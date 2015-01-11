@@ -1,0 +1,88 @@
+This is the HPkit package; it contains three simple tools optimised to 
+work with HP GPIB iterface.
+
+**************************************
+| DESCRIPTION                        |
+--------------------------------------
+
+The tools are:
+ 1. hplot
+ 2. hplisten
+ 3. hptalk
+
+1. hplot
+--------------------------------------
+hplot is a tool used to dump or receive plot data from an instrument
+using a serial GPIB adapter (e.g. the Prologix adapter) and emulating an
+HP plotter.
+
+You can set the device using the -d|--device option.
+
+You can set the adapter you're using with -a|--adapter option. Currently
+hplot supports only the prologix GPIB-USB adapter (currently GPIB-USB
+controller 6.0) see www.prologix.biz.
+
+You can set the address to communicate with the instrument by using -r|--address
+option.
+
+You may save data to a file, using -o|--output or dump it to stdout.
+
+You can use this tool within hp2xx, a GNU HPGL converter, with option -q, which
+tells hp2xx to read data from hplot's stdout, for example:
+
+ ./hplot -d /dev/ttyUSB0 | hp2xx -q
+
+This command opens a window showing processed data. It should show an image
+similar to the instrument's display.
+
+The program stops reading the serial, when not receiving characters, after a 
+timeout which can be set using the option -t|--timeout.
+
+2. hplisten
+--------------------------------------
+hplisten is a reduced version of hplot, which doesn't emulate plotter and only 
+dumps or saves received data to a file.
+
+It has the same options as hplot.
+
+3. hptalk
+--------------------------------------
+hptalk is a tool to send a command to the instrument and read the answer
+
+It has the same options as hplot;
+
+**************************************
+| INSTALL                            |
+--------------------------------------
+
+To build and install, run on a shell:
+
+./configure
+make
+sudo make install
+
+To read further information about bulding and installing see INSTALL
+
+**************************************
+| EXAMPLES AND USING                 |
+--------------------------------------
+
+To read further information about real examples and guides about using
+these tools see project's home page at www.rapgenic.com/hpkit.
+
+
+
+
+Mail suggestions and bug reports for these programs to
+the address on the last line of --help output.
+
+=====================================================================
+
+Copyright (C) 2015 Giulio Girardi.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.  A copy of the license is included in the "GNU Free
+Documentation License" file as part of this distribution.
