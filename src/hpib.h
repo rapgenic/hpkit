@@ -44,9 +44,10 @@ extern "C"
   int HPIB_serial_config (char *tty, int timeout);
   int HPIB_prologix_config ();
   int HPIB_serial_close ();
-  int HPIB_serial_read_until (unsigned char *buf, char until);
-  int HPIB_serial_write (unsigned char *string);
-
+  int HPIB_serial_read_until (char *buf, int len, char until);
+  int HPIB_serial_write (char *string);
+  int HPIB_serial_read_char (char *c);
+  
 #ifdef	__cplusplus
 }
 #endif

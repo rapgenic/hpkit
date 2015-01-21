@@ -76,7 +76,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = hplot$(EXEEXT) hplisten$(EXEEXT) hptalk$(EXEEXT)
+bin_PROGRAMS = hplot$(EXEEXT) hplisten$(EXEEXT) hptalk$(EXEEXT) \
+	hprologix$(EXEEXT)
 subdir = .
 DIST_COMMON = INSTALL NEWS README AUTHORS ChangeLog \
 	$(srcdir)/Makefile.in $(srcdir)/Makefile.am \
@@ -106,6 +107,11 @@ am_hplot_OBJECTS = src/hpib.$(OBJEXT) src/proto.$(OBJEXT) \
 	src/prologix_proto.$(OBJEXT) src/hplot.$(OBJEXT)
 hplot_OBJECTS = $(am_hplot_OBJECTS)
 hplot_LDADD = $(LDADD)
+am_hprologix_OBJECTS = src/hpib.$(OBJEXT) src/common.$(OBJEXT) \
+	src/adapters.$(OBJEXT) src/prologix_proto.$(OBJEXT) \
+	src/hprologix.$(OBJEXT)
+hprologix_OBJECTS = $(am_hprologix_OBJECTS)
+hprologix_LDADD = $(LDADD)
 am_hptalk_OBJECTS = src/hpib.$(OBJEXT) src/common.$(OBJEXT) \
 	src/adapters.$(OBJEXT) src/prologix_proto.$(OBJEXT) \
 	src/hptalk.$(OBJEXT)
@@ -139,8 +145,10 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(hplisten_SOURCES) $(hplot_SOURCES) $(hptalk_SOURCES)
-DIST_SOURCES = $(hplisten_SOURCES) $(hplot_SOURCES) $(hptalk_SOURCES)
+SOURCES = $(hplisten_SOURCES) $(hplot_SOURCES) $(hprologix_SOURCES) \
+	$(hptalk_SOURCES)
+DIST_SOURCES = $(hplisten_SOURCES) $(hplot_SOURCES) \
+	$(hprologix_SOURCES) $(hptalk_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -294,6 +302,13 @@ hptalk_SOURCES = \
 	src/prologix_proto.c \
 	src/hptalk.c
 
+hprologix_SOURCES = \
+	src/hpib.c	     \
+	src/common.c	     \
+	src/adapters.c       \
+	src/prologix_proto.c \
+	src/hprologix.c
+
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -415,6 +430,12 @@ src/hplot.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 hplot$(EXEEXT): $(hplot_OBJECTS) $(hplot_DEPENDENCIES) $(EXTRA_hplot_DEPENDENCIES) 
 	@rm -f hplot$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(hplot_OBJECTS) $(hplot_LDADD) $(LIBS)
+src/hprologix.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
+
+hprologix$(EXEEXT): $(hprologix_OBJECTS) $(hprologix_DEPENDENCIES) $(EXTRA_hprologix_DEPENDENCIES) 
+	@rm -f hprologix$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(hprologix_OBJECTS) $(hprologix_LDADD) $(LIBS)
 src/hptalk.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 
@@ -434,6 +455,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hpib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hplisten.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hplot.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hprologix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hptalk.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/prologix_proto.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/proto.Po@am__quote@

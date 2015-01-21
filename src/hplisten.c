@@ -44,16 +44,20 @@ int
 main (int argc, char **argv)
 {
   // temp vars
-  char buf[BUF_MAXLEN];
+  char buf;
   int c, d;
+  char *endptr, *endptr_s;
+  char *pad_temp, *sad_temp;
 
   // default values
   char tty[STR_MAXLEN] = "/dev/ttyUSB0";
   FILE *f_output = NULL;
   int using_output_file = 0;
+  int config_adapter = 1;
   char output_path[STR_MAXLEN] = "";
   int timeout = 20;
   int ad_address = 5;
+  int ad_saddress = PROLOGIX_NONE;
 
   // set the default adapter
   set_adapter (AD_PROLOGIX);
@@ -89,6 +93,8 @@ main (int argc, char **argv)
         case 'a':
           if (strcmp (optarg, "prologix") == 0)
             set_adapter (AD_PROLOGIX);
+          else if (strcmp (optarg, "none") == 0)
+            config_adapter = 0;
           else
             {
               printf ("%s: non valid option -- \"%s\"\nChoosing 'prologix'\n", PROGRAM_NAME, optarg);
@@ -97,7 +103,27 @@ main (int argc, char **argv)
           break;
 
         case 'r':
-          ad_address = atoi (optarg);
+          pad_temp = strtok (optarg, ",");
+          sad_temp = strtok (NULL, ",");
+
+          ad_address = strtol (pad_temp, &endptr, 10);
+
+          if (*endptr != '\0')
+            {
+              printf ("%s: non valid option -- \"%s\"\n", PROGRAM_NAME, pad_temp);
+              return (EXIT_FAILURE);
+            }
+
+          if (sad_temp != NULL)
+            {
+              ad_saddress = strtol (sad_temp, &endptr_s, 10);
+
+              if (*endptr_s != '\0')
+                {
+                  printf ("%s: non valid option -- \"%s\"\n", PROGRAM_NAME, sad_temp);
+                  return (EXIT_FAILURE);
+                }
+            }
           break;
 
         case 'o':
@@ -126,8 +152,9 @@ Dump or save data sent by HP instrument's GPIB interface\n");
                             default: '/dev/ttyUSB0'\n\
   -a, --adapter=ADAPTER     set the adapter used to communicate with the\n\
                             instrument; default: 'prologix'\n\
-  -r, --address=ADDRESS     choose the address used to listen to the\n\
-                            instrument; default: 5\n\
+  -r, --address=PAD,[SAD]   choose the address used to listen to the instrument;\n\
+                            (PAD is the primary address, SAD the secondary which\n\
+                            isn't necessary); default: 5,0\n\
   -o, --output=OUTFILE      send data to FILE instead of stdout\n\
   -t, --timeout=TIMEOUT     set TIMEOUT in millisecs for serial port; default: 2000\n\
                             min: 100\n\
@@ -136,6 +163,8 @@ Dump or save data sent by HP instrument's GPIB interface\n");
           puts ("\
 ADAPTER stands for the adapter you are using. Supported adapters are:\n\
   prologix                  the Prologix adapter, fully supported\n\
+  none                      don't configure the adapter (it will also disable\n\
+                            the -r|--address option)\n\
 \nMore adapters may be added in the future\n");
           help ();
           return (EXIT_SUCCESS);
@@ -165,8 +194,11 @@ Dump or save data sent by HP instrument's GPIB interface\n");
     }
 
   // check and config adapter's settings
-  check_adapter_options ();
-  ad_set_address (ad_address);
+  if (config_adapter)
+    {
+      check_adapter_options ();
+      ad_set_address (ad_address, ad_saddress);
+    }
 
   // open the output file
   if (using_output_file)
@@ -185,14 +217,14 @@ Dump or save data sent by HP instrument's GPIB interface\n");
   while (1)
     {
       // read the serial
-      if (!HPIB_serial_read_until (buf, '\n'))
+      if (!HPIB_serial_read_char (&buf))
         break;
 
       // print the output
       if (using_output_file)
-        fprintf (f_output, "%s", buf);
+        fprintf (f_output, "%c", buf);
       else
-        printf ("%s", buf);
+        printf ("%c", buf);
     }
 
   // close the devicse

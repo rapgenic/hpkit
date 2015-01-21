@@ -13,9 +13,17 @@ extern "C" {
 #endif
 
     typedef enum {
+        MD_BOTH = -1,
         MD_DEVICE = 0,
         MD_CONTROLLER,
     } ad_mode_t;
+
+    typedef enum {
+        EO_CRLF = 0,
+        EO_CR,
+        EO_LF,
+        EO_NONE
+    } ad_eos_t;
 
 #ifdef	__cplusplus
 }

@@ -38,14 +38,37 @@ extern "C" {
 
     int set_adapter(adapters_t ad);
 
-    int (*ad_set_address)(int addr);
-    int (*ad_get_address)();
-    int (*ad_set_mode)(ad_mode_t mode);
-    ad_mode_t(*ad_get_mode)();
-    int (*ad_set_lon)(int val);
-    int (*ad_get_lon)();
+    int (*ad_set_address)(int pad, int sad);
+    int (*ad_get_address)(int *returnsad);
     int (*ad_set_auto)(int val);
     int (*ad_get_auto)();
+    int (*ad_clr)();
+    int (*ad_set_eoi)(int val);
+    int (*ad_get_eoi)();
+    int (*ad_set_eos)(ad_eos_t mode);
+    ad_eos_t (*ad_get_eos)();
+    int (*ad_set_eot_enable)(int val);
+    int (*ad_get_eot_enable)();
+    int (*ad_set_eot_char)(int c);
+    int (*ad_get_eot_char)();
+    int (*ad_ifc)();
+    int (*ad_llo)();
+    int (*ad_loc)();
+    int (*ad_set_lon)(int val);
+    int (*ad_get_lon)();
+    int (*ad_set_mode)(ad_mode_t mode);
+    ad_mode_t(*ad_get_mode)();
+    int (*ad_read)(char *buf, char until);
+    int (*ad_read_tmo_ms)(int time);
+    int (*ad_rst)();
+    int (*ad_set_savecfg)(int val);
+    int (*ad_get_savecfg)();
+    int (*ad_spoll)(int pad, int sad);
+    int (*ad_srq)();
+    int (*ad_set_status)(int dsb);
+    int (*ad_status)();
+    int (*ad_trg)(char *buf, char *list);
+    int (*ad_ver)(char *buf);
 
 #ifdef	__cplusplus
 }

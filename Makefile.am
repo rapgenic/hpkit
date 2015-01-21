@@ -1,4 +1,4 @@
-bin_PROGRAMS = hplot hplisten hptalk
+bin_PROGRAMS = hplot hplisten hptalk hprologix
 
 hplot_SOURCES = \
 	src/hpib.c	     \
@@ -21,3 +21,10 @@ hptalk_SOURCES = \
 	src/adapters.c	     \
 	src/prologix_proto.c \
 	src/hptalk.c
+	
+hprologix_SOURCES = \
+	src/hpib.c	     \
+	src/common.c	     \
+	src/adapters.c       \
+	src/prologix_proto.c \
+	src/hprologix.c

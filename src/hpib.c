@@ -51,40 +51,74 @@ HPIB_serial_config (char *tty, int timeout)
 }
 
 int
-HPIB_serial_read_until (unsigned char *buf, char until)
+HPIB_serial_read_until (char *buf, int len, char until)
 {
-  unsigned char c;
+  char c;
   int count = 0;
+  int rr;
 
-  memset (buf, 0, BUF_MAXLEN);
+  memset (buf, 0, len);
 
   do
     {
-      if (read (f_serial, &c, 1) <= 0)
+      /*rr = read (f_serial, &c, 1);
+
+      if (rr == -1)
         {
+          perror ("HPIB_serial_read_until");
           return 0;
         }
-
-      if (count >= BUF_MAXLEN)
+      else if (rr == 0)
+        return 0;*/
+      
+      if (!HPIB_serial_read_char (&c))
         return 0;
+
+      if (count >= len)
+        {
+          puts ("buffer is too small");
+          return 0;
+        }
 
       buf[count] = c;
       count++;
     }
   while (c != until);
+  
+  buf[count] = '\0';
+  
+  return 1;
+}
+
+int
+HPIB_serial_read_char (char *c)
+{
+  int rr;
+  char d;
+
+  rr = read (f_serial, c, 1);
+
+  if (rr == -1)
+    {
+      perror ("HPIB_serial_read_char");
+      return 0;
+    }
+
+  if (rr == 0)
+    return 0;
 
   return 1;
 }
 
 int
-HPIB_serial_write (unsigned char *string)
+HPIB_serial_write (char *string)
 {
   if (write (f_serial, string, strlen (string)) == -1)
     {
-      perror ("writing serial failed");
+      perror ("HPIB_serial_write");
       return 0;
     }
-  
+
   return 1;
 }
 

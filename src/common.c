@@ -37,8 +37,7 @@ help ()
 {
   printf ("\
 Report bugs to: %s\n\
-pkg home page: <%s>\n\
-General help using this software: <%s/docs>\n", PACKAGE_BUGREPORT, PACKAGE_URL, PACKAGE_URL);
+Package home page: <%s>\n", PACKAGE_BUGREPORT, PACKAGE_URL);
 
   return 1;
 }

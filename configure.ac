@@ -22,5 +22,5 @@ AC_CHECK_FUNCS([memset])
 
 AC_CONFIG_FILES([Makefile])
 AC_DEFINE([STR_MAXLEN], [100], ["Maximum number of characters per string"])
-AC_DEFINE([BUF_MAXLEN], [300], ["Maximum number of characters per buffer"])
+AC_DEFINE([BUF_MAXLEN], [400], ["Maximum number of characters per buffer"])
 AC_OUTPUT

@@ -2,3 +2,10 @@
 
 	First commit; release 0.1
 
+2015-01-21  Giulio Girardi  <giulio@rapgenic.com>
+
+        release 0.2; added full support for Prologix command set, rewritten 
+        command definition functions, fixed bugs in hplisten, added new options 
+        to hptalk, added new tool (hprologix) to configure the Prologix adapter,
+        added SAD (Secondary ADdress) support, added new function to read one
+        character from the serial, fixed documentation url

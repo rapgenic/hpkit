@@ -4229,7 +4229,7 @@ ac_config_files="$ac_config_files Makefile"
 $as_echo "#define STR_MAXLEN 100" >>confdefs.h
 
 
-$as_echo "#define BUF_MAXLEN 300" >>confdefs.h
+$as_echo "#define BUF_MAXLEN 400" >>confdefs.h
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure

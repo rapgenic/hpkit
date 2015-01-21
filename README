@@ -1,5 +1,5 @@
-This is the HPkit package; it contains three simple tools optimised to 
-work with HP GPIB iterface.
+This is the HPkit package; it contains three simple CLI linux tools 
+optimised to work with HP GPIB iterface.
 
 **************************************
 | DESCRIPTION                        |
@@ -9,6 +9,7 @@ The tools are:
  1. hplot
  2. hplisten
  3. hptalk
+ 4. hprologix
 
 1. hplot
 --------------------------------------
@@ -20,7 +21,7 @@ You can set the device using the -d|--device option.
 
 You can set the adapter you're using with -a|--adapter option. Currently
 hplot supports only the prologix GPIB-USB adapter (currently GPIB-USB
-controller 6.0) see www.prologix.biz.
+controller 6.0) see http://www.prologix.biz
 
 You can set the address to communicate with the instrument by using -r|--address
 option.
@@ -49,7 +50,52 @@ It has the same options as hplot.
 --------------------------------------
 hptalk is a tool to send a command to the instrument and read the answer
 
+You can tell hptalk not to read the answer sent by the instument if you need
+it with -n|-no-answer option. BE CAREFUL, you can't use hplisten to read later 
+the instrument's answer, because it uses a different technique. You have to use 
+hptalk with the ADAPTER's command for reading (e.g "++read"), if you use
+hplisten it will produce no output.
+
+For example, with prologix adapter you would use:
+
+$ hptalk -n FRS?         # It sends the FRS? command but doesn't read the answer
+$ hptalk ++read          # NOW it reads the answer
++1.000000E+05
+$
+
 It has the same options as hplot;
+
+4. hprologix
+--------------------------------------
+hprologix is a tool used to configure manually the Prologix adapter (NOTE that
+normally the configuration is done by the single programs) and to send special
+signals, for example RST (reset) or CLR (clear).
+
+when you configure the adapter with hprologix, you may want to use the option 
+"-a|--adapter none" which tells the program NOT to configure the adapter 
+properly, to keep using your settings.
+
+To get current configuration, simply call hprologix with option -g|--get-config.
+
+To change the GPIB address, you use the option -r|--address, separating PAD 
+(Primary ADdress) and SAD (Secondary ADdress) with a comma (NOTE that SAD isn't
+compulsory).
+
+To enable the autoreading feature after sending a command, use the option
+-a|--autoread followed by 1 if you want to enable it, 0 if not.
+
+With hprologix you can also send to the adapter the following signals:
+ - IFC
+ - CLR
+ - LOC
+ - SRQ
+ - SPOLL
+
+You can send them with option -n|--signal followed by the signal name (NOTE that
+you can send only one signal once)
+
+For more information about the previous signals see the Prologix Adapter User
+Manual, which you can find at http://www.prologix.biz 
 
 **************************************
 | INSTALL                            |
@@ -68,8 +114,7 @@ To read further information about bulding and installing see INSTALL
 --------------------------------------
 
 To read further information about real examples and guides about using
-these tools see project's home page at www.rapgenic.com/hpkit.
-
+these tools see project's home page at http://www.rapgenic.com/hpkit
 
 
 
