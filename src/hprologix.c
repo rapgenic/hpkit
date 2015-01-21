@@ -331,7 +331,7 @@ Configure the prologix adapter\n");
         printf ("\n");
 
       printf ("EOI: %s\n", (ad_get_eoi () ? "Enabled" : "Disabled"));
-      if (ad_get_eot_enable)
+      if (ad_get_eot_enable ())
         {
           char c = ad_get_eot_char ();
           printf ("EOT: Character %d ('%c')\n", c, c);
