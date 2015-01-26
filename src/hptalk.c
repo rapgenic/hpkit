@@ -1,20 +1,20 @@
 /*
     Copyright (C) 2015 Giulio Girardi.
 
-    This file is part of HPlot.
+    This file is part of HPKit.
 
-    HPlot is free software: you can redistribute it and/or modify
+    HPKit is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    HPlot is distributed in the hope that it will be useful,
+    HPKit is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with HPlot.  If not, see <http://www.gnu.org/licenses/>.
+    along with HPKit.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -72,6 +72,7 @@ main (int argc, char **argv)
   int timeout = 20;
   int ad_address = 20;
   int ad_saddress = PROLOGIX_NONE;
+  int multi_row_answer = 0;
 
   // set the default adapter
   set_adapter (AD_PROLOGIX);
@@ -86,6 +87,7 @@ main (int argc, char **argv)
         {"output", required_argument, 0, 'o'},
         {"timeout", required_argument, 0, 't'},
         {"no-answer", no_argument, 0, 'n'},
+        {"multi-row-answer", no_argument, 0, 'm'},
         {"help", no_argument, 0, 'h'},
         {"version", no_argument, 0, 'v'},
         {0, 0, 0, 0}
@@ -93,7 +95,7 @@ main (int argc, char **argv)
 
       int option_index = 0;
 
-      c = getopt_long (argc, argv, "d:a:r:o:t:nhv", long_options, &option_index);
+      c = getopt_long (argc, argv, "d:a:r:o:t:nmhv", long_options, &option_index);
 
       if (c == -1)
         break;
@@ -147,19 +149,23 @@ main (int argc, char **argv)
           break;
 
         case 't':
-          d = atoi (optarg) / 100;
+          d = atoi (optarg);
 
-          if (d == 0)
+          if (d < 100)
             {
               printf ("%s: non valid option -- \"%s\"\n", PROGRAM_NAME, optarg);
               return (EXIT_FAILURE);
             }
 
-          timeout = d;
+          timeout = d / 100;
           break;
 
         case 'n':
           read_answer = 0;
+          break;
+
+        case 'm':
+          multi_row_answer = 1;
           break;
 
         case 'h':
@@ -175,9 +181,10 @@ Send a command to an instrument using GPIB interface and read the answer\n");
                             (PAD is the primary address, SAD the secondary which\n\
                             isn't necessary); default: 20,0\n\
   -o, --output=OUTFILE      send data to FILE instead of stdout\n\
-  -t, --timeout=TIMEOUT     set TIMEOUT in millisecs for serial port; default: 2000\n\
-                            min: 100\n\
+  -t, --timeout=TIMEOUT     set TIMEOUT in millisecs for serial port; default:\n\
+                            2000, min: 100\n\
   -n, --no-answer           don't wait for the instrument's answer\n\
+  -m, --multi-row-answer    read more than one row in the answer\n\
   -h, --help                show this help and exit\n\
   -v, --version             show information about program version and exit\n");
           puts ("\
@@ -255,25 +262,43 @@ Send a command to an instrument using GPIB interface and read the answer\n");
 
   if (read_answer)
     {
-      if (!HPIB_serial_read_until (buf, BUF_MAXLEN, '\n'))
+      if (multi_row_answer)
         {
-          HPIB_serial_close ();
-
-          if (using_output_file)
+          while (HPIB_serial_read_until (buf, BUF_MAXLEN, '\n'))
             {
-              fclose (f_output);
+              if (using_output_file)
+                {
+                  fprintf (f_output, "%s", buf);
+                }
+              else
+                {
+                  printf ("%s", buf);
+                }
             }
-
-          return (EXIT_SUCCESS);
-        }
-      // print the output
-      if (using_output_file)
-        {
-          fprintf (f_output, "%s", buf);
         }
       else
         {
-          printf ("%s", buf);
+          if (!HPIB_serial_read_until (buf, BUF_MAXLEN, '\n'))
+            {
+              HPIB_serial_close ();
+
+              if (using_output_file)
+                {
+                  fclose (f_output);
+                }
+
+              return (EXIT_SUCCESS);
+            }
+
+          // print the output
+          if (using_output_file)
+            {
+              fprintf (f_output, "%s", buf);
+            }
+          else
+            {
+              printf ("%s", buf);
+            }
         }
     }
 

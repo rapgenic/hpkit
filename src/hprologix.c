@@ -1,20 +1,20 @@
 /*
     Copyright (C) 2015 Giulio Girardi.
 
-    This file is part of HPlot.
+    This file is part of HPKit.
 
-    HPlot is free software: you can redistribute it and/or modify
+    HPKit is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    HPlot is distributed in the hope that it will be useful,
+    HPKit is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with HPlot.  If not, see <http://www.gnu.org/licenses/>.
+    along with HPKit.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -224,26 +224,28 @@ Configure the prologix adapter\n");
   -d, --device=STRING       communicate with serial interface defined by STRING;\n\
                             default: '/dev/ttyUSB0'\n\
   -g, --get-config          get current cofiguration\n\
-  -m, --mode=MODE           set adapter mode (0: DEVICE, 1: CONTROLLER); default: 1\n\
+  -m, --mode=MODE           set adapter mode (0: DEVICE, 1: CONTROLLER);\n\
+                            default: 1\n\
   -r, --address=PAD,[SAD]   set the address used by the instrument (PAD is the\n\
-                            primary address, SAD the secondary which isn't necessary);\n\
-                            default: 20,0\n\
+                            primary address, SAD the secondary which isn't\n\
+                            necessary); default: 20,0\n\
   -a, --autoread=BOOL       set whether the adapter should read the instrument\n\
                             answer (disabled if mode is DEVICE); default: 1;\n\
-  -e, --eoi=BOOL            enable or disable EOI signal with last transmitted byte\n\
+  -e, --eoi=BOOL            enable or disable EOI signal with last transmitted\n\
+                            byte\n\
   -t, --eot=CHAR            enable EOT and set the EOT character (-1: DISABLED);\n\
                             default: -1\n\
-  -s, --eos=EOS             set GPIB temination characters (0: CR+LF, 1: CR, 2: LF,\n\
-                            3: NONE); default: 0\n\
-  -n, --signal=SIG          send to the adapter the signal SIG (disables any other\n\
-                            option, except for -d, -h and -v)\n\
+  -s, --eos=EOS             set GPIB temination characters (0: CR+LF, 1: CR,\n\
+                            2: LF, 3: NONE); default: 0\n\
+  -n, --signal=SIG          send to the adapter the signal SIG (disables any\n\
+                            other option, except for -d, -h and -v)\n\
   -h, --help                show this help and exit\n\
   -v, --version             show information about program version and exit\n");
           puts ("\
 SIG stands for one of the following signals:\n\
   IFC                       send the IFC signal\n\
-  CLR                       send the SDC (Selected Device Clear) to the currently\n\
-                            specified address\n\
+  CLR                       send the SDC (Selected Device Clear) to the current\n\
+                            address\n\
   LOC                       enable front panel operation of the currently\n\
                             addressed instrument\n\
   SRQ                       return the current state of the SRQ signal (0: NOT\n\

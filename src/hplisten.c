@@ -1,20 +1,20 @@
 /*
     Copyright (C) 2015 Giulio Girardi.
 
-    This file is part of HPlot.
+    This file is part of HPKit.
 
-    HPlot is free software: you can redistribute it and/or modify
+    HPKit is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    HPlot is distributed in the hope that it will be useful,
+    HPKit is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with HPlot.  If not, see <http://www.gnu.org/licenses/>.
+    along with HPKit.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -156,8 +156,8 @@ Dump or save data sent by HP instrument's GPIB interface\n");
                             (PAD is the primary address, SAD the secondary which\n\
                             isn't necessary); default: 5,0\n\
   -o, --output=OUTFILE      send data to FILE instead of stdout\n\
-  -t, --timeout=TIMEOUT     set TIMEOUT in millisecs for serial port; default: 2000\n\
-                            min: 100\n\
+  -t, --timeout=TIMEOUT     set TIMEOUT in millisecs for serial port; default:\n\
+                            2000, min: 100\n\
   -h, --help                show this help and exit\n\
   -v, --version             show information about program version and exit\n");
           puts ("\
@@ -227,7 +227,7 @@ Dump or save data sent by HP instrument's GPIB interface\n");
         printf ("%c", buf);
     }
 
-  // close the devicse
+  // close the devices
   HPIB_serial_close ();
 
   if (using_output_file)
