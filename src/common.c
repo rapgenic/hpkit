@@ -20,6 +20,18 @@
 #include "common.h"
 
 int
+help_adapters ()
+{
+  puts ("\
+ADAPTER stands for the adapter you are using. Supported adapters are:\n\
+  prologix                  the Prologix adapter, fully supported\n\
+  galvant                   the Galvant adapter, actually in development\n\
+  none                      don't configure the adapter (it will also disable\n\
+                            the -r|--address option)\n\
+\nMore adapters may be added in the future\n");
+}
+
+int
 version (char *progname)
 {
   printf ("%s (%s) %s\n", progname, PACKAGE_NAME, VERSION);

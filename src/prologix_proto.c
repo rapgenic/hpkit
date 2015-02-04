@@ -26,7 +26,7 @@ prologix_set_address (int pad, int sad)
 
   if (sad != PROLOGIX_NONE)
     {
-      if (!_prologix_limit_check (96, sad, 126))
+      if (!_limit_check (96, sad, 126))
         {
           printf ("prologix addr: non valid option -- \"%d\"\n", sad);
           return 0;
@@ -35,7 +35,7 @@ prologix_set_address (int pad, int sad)
 
   if (pad != PROLOGIX_NONE)
     {
-      if (!_prologix_limit_check (0, pad, 30))
+      if (!_limit_check (0, pad, 30))
         {
           printf ("prologix addr: non valid option -- \"%d\"\n", pad);
           return 0;
@@ -57,7 +57,7 @@ prologix_set_address (int pad, int sad)
       return 0;
     }
 
-  if (!_prologix_command ("addr", NULL, 0, MD_BOTH, param))
+  if (!_command ("addr", NULL, 0, MD_BOTH, param))
     return 0;
 
   return 1;
@@ -73,7 +73,7 @@ prologix_get_address (int *returnsad)
   char *pad;
   char *sad = NULL;
 
-  if (!_prologix_command ("addr", buf, 1, MD_BOTH, NULL))
+  if (!_command ("addr", buf, 1, MD_BOTH, NULL))
     return -1;
 
   pad = strtok (buf, " ");
@@ -90,7 +90,7 @@ prologix_set_auto (int val)
 {
   char param[STR_MAXLEN];
 
-  if (!_prologix_limit_check (0, val, 1))
+  if (!_limit_check (0, val, 1))
     {
       printf ("prologix auto: wrong parameter interval\n");
       return 0;
@@ -98,7 +98,7 @@ prologix_set_auto (int val)
 
   sprintf (param, "%d", val);
 
-  if (!_prologix_command ("auto", NULL, 0, MD_CONTROLLER, param))
+  if (!_command ("auto", NULL, 0, MD_CONTROLLER, param))
     return 0;
 
   return 1;
@@ -109,7 +109,7 @@ prologix_get_auto ()
 {
   char buf[BUF_MAXLEN];
 
-  if (!_prologix_command ("auto", buf, 1, MD_CONTROLLER, NULL))
+  if (!_command ("auto", buf, 1, MD_CONTROLLER, NULL))
     return -1;
 
   return atoi (buf);
@@ -118,7 +118,7 @@ prologix_get_auto ()
 int
 prologix_clr ()
 {
-  if (!_prologix_command ("clr", NULL, 0, MD_CONTROLLER, NULL))
+  if (!_command ("clr", NULL, 0, MD_CONTROLLER, NULL))
     return 0;
 
   return 1;
@@ -129,7 +129,7 @@ prologix_set_eoi (int val)
 {
   char param[STR_MAXLEN];
 
-  if (!_prologix_limit_check (0, val, 1))
+  if (!_limit_check (0, val, 1))
     {
       printf ("prologix eoi: wrong parameter interval\n");
       return 0;
@@ -137,7 +137,7 @@ prologix_set_eoi (int val)
 
   sprintf (param, "%d", val);
 
-  if (!_prologix_command ("eoi", NULL, 0, MD_BOTH, param))
+  if (!_command ("eoi", NULL, 0, MD_BOTH, param))
     return 0;
 
   return 1;
@@ -148,7 +148,7 @@ prologix_get_eoi ()
 {
   char buf[BUF_MAXLEN];
 
-  if (!_prologix_command ("eoi", buf, 1, MD_BOTH, NULL))
+  if (!_command ("eoi", buf, 1, MD_BOTH, NULL))
     return -1;
 
   return atoi (buf);
@@ -159,7 +159,7 @@ prologix_set_eos (ad_eos_t mode)
 {
   char param[STR_MAXLEN];
 
-  if (!_prologix_limit_check (0, mode, 3))
+  if (!_limit_check (0, mode, 3))
     {
       printf ("prologix eos: wrong parameter interval\n");
       return 0;
@@ -167,7 +167,7 @@ prologix_set_eos (ad_eos_t mode)
 
   sprintf (param, "%d", mode);
 
-  if (!_prologix_command ("eos", NULL, 0, MD_BOTH, param))
+  if (!_command ("eos", NULL, 0, MD_BOTH, param))
     return 0;
 
   return 1;
@@ -178,7 +178,7 @@ prologix_get_eos ()
 {
   char buf[BUF_MAXLEN];
 
-  if (!_prologix_command ("eos", buf, 1, MD_BOTH, NULL))
+  if (!_command ("eos", buf, 1, MD_BOTH, NULL))
     return -1;
 
   return atoi (buf);
@@ -189,7 +189,7 @@ prologix_set_eot_enable (int val)
 {
   char param[STR_MAXLEN];
 
-  if (!_prologix_limit_check (0, val, 1))
+  if (!_limit_check (0, val, 1))
     {
       printf ("prologix eot_enable: wrong parameter interval\n");
       return 0;
@@ -197,7 +197,7 @@ prologix_set_eot_enable (int val)
 
   sprintf (param, "%d", val);
 
-  if (!_prologix_command ("eot_enable", NULL, 0, MD_BOTH, param))
+  if (!_command ("eot_enable", NULL, 0, MD_BOTH, param))
     return 0;
 
   return 1;
@@ -208,7 +208,7 @@ prologix_get_eot_enable ()
 {
   char buf[BUF_MAXLEN];
 
-  if (!_prologix_command ("eot_enable", buf, 1, MD_BOTH, NULL))
+  if (!_command ("eot_enable", buf, 1, MD_BOTH, NULL))
     return -1;
 
   return atoi (buf);
@@ -219,7 +219,7 @@ prologix_set_eot_char (int c)
 {
   char param[STR_MAXLEN];
 
-  if (!_prologix_limit_check (0, c, 255))
+  if (!_limit_check (0, c, 255))
     {
       printf ("prologix eot_char: wrong parameter interval\n");
       return 0;
@@ -227,7 +227,7 @@ prologix_set_eot_char (int c)
 
   sprintf (param, "%d", c);
 
-  if (!_prologix_command ("eot_char", NULL, 0, MD_BOTH, param))
+  if (!_command ("eot_char", NULL, 0, MD_BOTH, param))
     return 0;
 
   return 1;
@@ -238,7 +238,7 @@ prologix_get_eot_char ()
 {
   char buf[BUF_MAXLEN];
 
-  if (!_prologix_command ("eot_char", buf, 1, MD_BOTH, NULL))
+  if (!_command ("eot_char", buf, 1, MD_BOTH, NULL))
     return -1;
 
   return atoi (buf);
@@ -247,7 +247,7 @@ prologix_get_eot_char ()
 int
 prologix_ifc ()
 {
-  if (!_prologix_command ("ifc", NULL, 0, MD_CONTROLLER, NULL));
+  if (!_command ("ifc", NULL, 0, MD_CONTROLLER, NULL));
   return 0;
 
   return 1;
@@ -256,7 +256,7 @@ prologix_ifc ()
 int
 prologix_llo ()
 {
-  if (!_prologix_command ("llo", NULL, 0, MD_CONTROLLER, NULL))
+  if (!_command ("llo", NULL, 0, MD_CONTROLLER, NULL))
     return 0;
 
   return 1;
@@ -265,7 +265,7 @@ prologix_llo ()
 int
 prologix_loc ()
 {
-  if (!_prologix_command ("loc", NULL, 0, MD_CONTROLLER, NULL))
+  if (!_command ("loc", NULL, 0, MD_CONTROLLER, NULL))
     return 0;
 
   return 1;
@@ -276,7 +276,7 @@ prologix_set_lon (int val)
 {
   char param[STR_MAXLEN];
 
-  if (!_prologix_limit_check (0, val, 1))
+  if (!_limit_check (0, val, 1))
     {
       printf ("prologix lon: wrong parameter interval\n");
       return 0;
@@ -284,7 +284,7 @@ prologix_set_lon (int val)
 
   sprintf (param, "%d", val);
 
-  if (!_prologix_command ("lon", NULL, 0, MD_DEVICE, param))
+  if (!_command ("lon", NULL, 0, MD_DEVICE, param))
     return 0;
 
   return 1;
@@ -295,7 +295,7 @@ prologix_get_lon ()
 {
   char buf[BUF_MAXLEN];
 
-  if (!_prologix_command ("lon", buf, 1, MD_DEVICE, NULL))
+  if (!_command ("lon", buf, 1, MD_DEVICE, NULL))
     return -1;
 
   return atoi (buf);
@@ -306,7 +306,7 @@ prologix_set_mode (ad_mode_t mode)
 {
   char param[STR_MAXLEN];
 
-  if (!_prologix_limit_check (0, mode, 1))
+  if (!_limit_check (0, mode, 1))
     {
       printf ("prologix mode: wrong parameter interval\n");
       return 0;
@@ -314,7 +314,7 @@ prologix_set_mode (ad_mode_t mode)
 
   sprintf (param, "%d", mode);
 
-  if (!_prologix_command ("mode", NULL, 0, MD_BOTH, param))
+  if (!_command ("mode", NULL, 0, MD_BOTH, param))
     return 0;
 
   return 1;
@@ -325,7 +325,7 @@ prologix_get_mode ()
 {
   char buf[BUF_MAXLEN];
 
-  if (!_prologix_command ("mode", buf, 1, MD_BOTH, NULL))
+  if (!_command ("mode", buf, 1, MD_BOTH, NULL))
     return -1;
 
   return atoi (buf);
@@ -342,7 +342,7 @@ prologix_read (char* buf, char until)
   else
     sprintf (param, "EOI");
 
-  if (!_prologix_command ("read", buf, 0, MD_CONTROLLER, param))
+  if (!_command ("read", buf, 0, MD_CONTROLLER, param))
     return 0;
 
   return 1;
@@ -353,7 +353,7 @@ prologix_read_tmo_ms (int time)
 {
   char param[STR_MAXLEN];
 
-  if (!_prologix_limit_check (1, time, 3000))
+  if (!_limit_check (1, time, 3000))
     {
       printf ("prologix read_tmo_ms: wrong parameter interval\n");
       return 0;
@@ -361,7 +361,7 @@ prologix_read_tmo_ms (int time)
 
   sprintf (param, "%d", time);
 
-  if (!_prologix_command ("read_tmo_ms", NULL, 0, MD_CONTROLLER, param))
+  if (!_command ("read_tmo_ms", NULL, 0, MD_CONTROLLER, param))
     return 0;
 
   return 1;
@@ -370,7 +370,7 @@ prologix_read_tmo_ms (int time)
 int
 prologix_rst ()
 {
-  if (!_prologix_command ("rst", NULL, 0, MD_BOTH, NULL))
+  if (!_command ("rst", NULL, 0, MD_BOTH, NULL))
     return 0;
 
   return 1;
@@ -381,7 +381,7 @@ prologix_set_savecfg (int val)
 {
   char param[STR_MAXLEN];
 
-  if (!_prologix_limit_check (0, val, 1))
+  if (!_limit_check (0, val, 1))
     {
       printf ("prologix savecfg: wrong parameter interval\n");
       return 0;
@@ -389,7 +389,7 @@ prologix_set_savecfg (int val)
 
   sprintf (param, "%d", val);
 
-  if (!_prologix_command ("savecfg", NULL, 0, MD_BOTH, param))
+  if (!_command ("savecfg", NULL, 0, MD_BOTH, param))
     return 0;
 
   return 1;
@@ -400,7 +400,7 @@ prologix_get_savecfg ()
 {
   char buf[BUF_MAXLEN];
 
-  if (!_prologix_command ("savecfg", buf, 1, MD_BOTH, NULL))
+  if (!_command ("savecfg", buf, 1, MD_BOTH, NULL))
     return -1;
 
   return atoi (buf);
@@ -414,7 +414,7 @@ prologix_spoll (int pad, int sad)
 
   if (sad != PROLOGIX_NONE)
     {
-      if (!_prologix_limit_check (96, sad, 126))
+      if (!_limit_check (96, sad, 126))
         {
           printf ("prologix spoll: wrong parameter interval\n");
           return 0;
@@ -423,7 +423,7 @@ prologix_spoll (int pad, int sad)
 
   if (pad != PROLOGIX_NONE)
     {
-      if (!_prologix_limit_check (0, pad, 30))
+      if (!_limit_check (0, pad, 30))
         {
           printf ("prologix spoll: wrong parameter interval\n");
           return 0;
@@ -441,7 +441,7 @@ prologix_spoll (int pad, int sad)
     }
 
   // TODO: CHECK THIS
-  if (!_prologix_command ("spoll", buf, 0, MD_CONTROLLER, (strcmp (param, "") ? param : NULL)))
+  if (!_command ("spoll", buf, 0, MD_CONTROLLER, (strcmp (param, "") ? param : NULL)))
     return -1;
 
   puts (buf);
@@ -454,7 +454,7 @@ prologix_srq ()
 {
   char buf[BUF_MAXLEN];
 
-  if (!_prologix_command ("srq", buf, 1, MD_CONTROLLER, NULL))
+  if (!_command ("srq", buf, 1, MD_CONTROLLER, NULL))
     return -1;
 
   return atoi (buf);
@@ -465,7 +465,7 @@ prologix_set_status (int dsb)
 {
   char param[STR_MAXLEN];
 
-  if (!_prologix_limit_check (0, dsb, 255))
+  if (!_limit_check (0, dsb, 255))
     {
       printf ("prologix status: wrong parameter interval\n");
       return 0;
@@ -473,7 +473,7 @@ prologix_set_status (int dsb)
 
   sprintf (param, "%d", dsb);
 
-  if (!_prologix_command ("status", NULL, 0, MD_DEVICE, param))
+  if (!_command ("status", NULL, 0, MD_DEVICE, param))
     return 0;
 
   return 1;
@@ -484,7 +484,7 @@ prologix_status ()
 {
   char buf[BUF_MAXLEN];
 
-  if (!_prologix_command ("status", buf, 1, MD_DEVICE, NULL))
+  if (!_command ("status", buf, 1, MD_DEVICE, NULL))
     return -1;
 
   return atoi (buf);
@@ -493,7 +493,7 @@ prologix_status ()
 int
 prologix_trg (char *buf, char *list)
 {
-  if (!_prologix_command ("trg", buf, 0, MD_CONTROLLER, list))
+  if (!_command ("trg", buf, 0, MD_CONTROLLER, list))
     return 0;
 
   return 1;
@@ -502,64 +502,8 @@ prologix_trg (char *buf, char *list)
 int
 prologix_ver (char *buf)
 {
-  if (!_prologix_command ("ver", buf, 1, MD_BOTH, NULL))
+  if (!_command ("ver", buf, 1, MD_BOTH, NULL))
     return 0;
-
-  return 1;
-}
-
-int
-_prologix_limit_check (int x, int y, int z)
-{
-  if (x > y || y > z)
-    return 0;
-
-  return 1;
-}
-
-int
-_prologix_command (char *command_t, char *returnbuf, int onerowanswer, ad_mode_t mode, char* params)
-{
-  char command[STR_MAXLEN] = "++";
-  int i;
-
-  if (mode != MD_BOTH)
-    if (prologix_get_mode () != mode)
-      {
-        printf ("prologix %s: wrong device mode\n", command_t);
-        return 0;
-      }
-
-  // create the command
-  strcat (command, command_t);
-  if (params != NULL)
-    {
-      strcat (command, " ");
-      strcat (command, params);
-    }
-  strcat (command, "\r\n");
-
-  if (!HPIB_serial_write (command))
-    return 0;
-
-  if (returnbuf != NULL)
-    {
-      if (onerowanswer)
-        {
-          if (!HPIB_serial_read_until (returnbuf, BUF_MAXLEN, '\n'))
-            return 0;
-        }
-      else
-        {
-          while (HPIB_serial_read_char (&returnbuf[i]))
-            i++;
-
-          returnbuf[i++] = '\0';
-        }
-
-      if (!strcmp (returnbuf, "") || !strcmp (returnbuf, "Unrecognized command\r\n"))
-        return 0;
-    }
 
   return 1;
 }

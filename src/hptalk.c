@@ -110,6 +110,8 @@ main (int argc, char **argv)
         case 'a':
           if (strcmp (optarg, "prologix") == 0)
             set_adapter (AD_PROLOGIX);
+          else if (strcmp (optarg, "galvant") == 0)
+            set_adapter (AD_GALVANT);
           else if (strcmp (optarg, "none") == 0)
             config_adapter = 0;
           else
@@ -187,12 +189,7 @@ Send a command to an instrument using GPIB interface and read the answer\n");
   -m, --multi-row-answer    read more than one row in the answer\n\
   -h, --help                show this help and exit\n\
   -v, --version             show information about program version and exit\n");
-          puts ("\
-ADAPTER stands for the adapter you are using. Supported adapters are:\n\
-  prologix                  the Prologix adapter, fully supported\n\
-  none                      don't configure the adapter (it will also disable\n\
-                            the -r|--address option)\n\
-\nMore adapters may be added in the future\n");
+          help_adapters ();
           help ();
           return (EXIT_SUCCESS);
           break;

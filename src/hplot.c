@@ -93,6 +93,8 @@ main (int argc, char **argv)
         case 'a':
           if (strcmp (optarg, "prologix") == 0)
             set_adapter (AD_PROLOGIX);
+          else if (strcmp (optarg, "galvant") == 0)
+            set_adapter (AD_GALVANT);
           else if (strcmp (optarg, "none") == 0)
             config_adapter = 0;
           else
@@ -160,12 +162,7 @@ Dump or save plot data sent by HP instrument's GPIB interface\n");
                             2000, min: 100\n\
   -h, --help                show this help and exit\n\
   -v, --version             show information about program version and exit\n");
-          puts ("\
-ADAPTER stands for the adapter you are using. Supported adapters are:\n\
-  prologix                  the Prologix adapter, fully supported\n\
-  none                      don't configure the adapter (it will also disable\n\
-                            the -r|--address option)\n\
-\nMore adapters may be added in the future\n");
+          help_adapters ();
           help ();
           return (EXIT_SUCCESS);
           break;

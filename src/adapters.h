@@ -21,6 +21,7 @@
 
 #include "adapters_common.h"
 #include "prologix_proto.h"
+#include "galvant_proto.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -34,6 +35,7 @@ extern "C" {
 
     typedef enum {
         AD_PROLOGIX = 0,
+        AD_GALVANT,
     } adapters_t;
 
     int set_adapter(adapters_t ad);
@@ -46,7 +48,7 @@ extern "C" {
     int (*ad_set_eoi)(int val);
     int (*ad_get_eoi)();
     int (*ad_set_eos)(ad_eos_t mode);
-    ad_eos_t (*ad_get_eos)();
+    ad_eos_t(*ad_get_eos)();
     int (*ad_set_eot_enable)(int val);
     int (*ad_get_eot_enable)();
     int (*ad_set_eot_char)(int c);

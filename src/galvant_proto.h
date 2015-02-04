@@ -21,20 +21,28 @@
 
 #include <stdio.h>
 
-#ifndef COMMON_H
-#define	COMMON_H
+#include "hpib.h"
+#include "adapters_common.h"
+
+#ifndef GALVANT_PROTO_H
+#define	GALVANT_PROTO_H
+
+#define PROLOGIX_EOI 256
+#define PROLOGIX_NONE -1
 
 #ifdef	__cplusplus
-extern "C"
-{
+extern "C" {
 #endif
-    
-    int help_adapters ();
-    int version (char *progname);
-    int help ();
 
+    // SAD is not necessary
+    int galvant_set_address(int pad, int sad);
+    int galvant_get_address();
+    int galvant_set_auto(int val);
+    int galvant_get_auto();
+    
 #ifdef	__cplusplus
 }
 #endif
 
-#endif				/* COMMON_H */
+#endif	/* GALVANT_PROTO_H */
+
