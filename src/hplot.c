@@ -81,6 +81,7 @@ main(int argc, char **argv)
             {"address", required_argument, 0, 'r'},
             {"output", required_argument, 0, 'o'},
             {"timeout", required_argument, 0, 't'},
+            {"no-config", no_argument, 0, 'c'},
             {"help", no_argument, 0, 'h'},
             {"version", no_argument, 0, 'v'},
             {0, 0, 0, 0}
@@ -88,7 +89,7 @@ main(int argc, char **argv)
 
         int option_index = 0;
 
-        c = getopt_long(argc, argv, "d:a:r:o:t:hv", long_options, &option_index);
+        c = getopt_long(argc, argv, "d:a:r:o:t:chv", long_options, &option_index);
 
         if (c == -1)
             break;
@@ -146,6 +147,10 @@ main(int argc, char **argv)
             timeout = d / 100;
             break;
 
+        case 'c':
+            config_adapter = 0;
+            break;
+
         case 'h':
             puts("\
 Usage: hplot [OPTIONS]...\n\
@@ -161,6 +166,8 @@ Dump or save plot data sent by HP instrument's GPIB interface\n");
   -o, --output=OUTFILE      send data to FILE instead of stdout\n\
   -t, --timeout=TIMEOUT     set TIMEOUT in millisecs for serial port; default:\n\
                             2000, min: 100\n\
+  -c, --no-config           don't configure the adapter (it will also disable\n\
+                            the -r|--address option)\n\
   -h, --help                show this help and exit\n\
   -v, --version             show information about program version and exit\n");
             puts("\
