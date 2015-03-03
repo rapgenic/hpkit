@@ -1,0 +1,279 @@
+<!--
+    Copyright (C) 2015 Giulio Girardi.
+
+    This file is part of HPKit.
+
+    HPKit is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    HPKit is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with HPKit.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<adapter name="prologix" baudrate="115200">
+    <!-- CONSTANTS -->
+    <const name="EO_CRLF">0</const>
+    <const name="EO_CR">1</const>
+    <const name="EO_LF">2</const>
+    <const name="EO_NONE">3</const>
+    
+    <const name="MD_DEVICE">0</const>
+    <const name="MD_CONTROLLER">1</const>
+    
+    <const name="DISABLED">0</const>
+    <const name="ENABLED">1</const>
+    
+    <!-- COMMANDS -->
+    <commands syntax="pca(s)" prefix="++">
+        
+        <setaddress cmd="addr" mode="both">
+            <params>
+                <param type="limit">
+                    <from>0</from>
+                    <upto>30</upto>
+                </param>
+                <param type="limit">
+                    <from>96</from>
+                    <upto>126</upto>
+                </param>
+            </params>
+            <answer></answer>
+            <return>
+                <error>-1</error>
+            </return>
+        </setaddress>
+        
+        <getaddress cmd="addr" mode="both">
+            <params></params>
+            <answer>
+                <separator>s</separator>
+                <param type="limit" id="0">
+                    <from>0</from>
+                    <upto>30</upto>
+                </param>                
+                <param type="limit" id="1">
+                    <from>96</from>
+                    <upto>126</upto>
+                </param>
+            </answer>
+            <return>
+                <error>-1</error>
+                <std>
+                    <id>0</id>
+                </std>
+                <other>
+                    <id>1</id>
+                </other>
+            </return>
+        </getaddress>
+        
+        <setauto cmd="auto" mode="controller">
+            <params>
+                <param type="bit"/>
+            </params>
+            <answer></answer>
+            <return>
+                <error>-1</error>
+            </return>
+        </setauto>
+        
+        <getauto cmd="auto" mode="controller">
+            <params></params>
+            <answer>
+                <separator>s</separator>
+                <param type="bit" id="0"/>
+            </answer>
+            <return>
+                <error>-1</error>
+                <std>
+                    <id>0</id>
+                </std>
+                <other></other>
+            </return>
+        </getauto>
+        
+        <!-- MORE -->
+        
+        <seteoi cmd="eoi" mode="both">
+            <params>
+                <param type="bit"/>
+            </params>
+            <answer></answer>
+            <return>
+                <error>-1</error>
+            </return>
+        </seteoi>
+        
+        <geteoi cmd="eoi" mode="both">
+            <params></params>
+            <answer>
+                <separator>s</separator>
+                <param type="bit" id="0"/>
+            </answer>
+            <return>
+                <error>-1</error>
+                <std>
+                    <id>0</id>
+                </std>
+                <other></other>
+            </return>
+        </geteoi>
+        
+        <seteos cmd="eos" mode="both">
+            <params>
+                <param type="limit">
+                    <from>0</from>
+                    <upto>3</upto>
+                </param>
+            </params>
+            <answer></answer>
+            <return>
+                <error>-1</error>
+            </return>
+        </seteos>
+        
+        <geteos cmd="eos" mode="both">
+            <params></params>
+            <answer>
+                <separator>s</separator>
+                <param type="limit" id="0">
+                    <from>0</from>
+                    <upto>3</upto>
+                </param>
+            </answer>
+            <return>
+                <error>-1</error>
+                <std>
+                    <id>0</id>
+                </std>
+                <other></other>
+            </return>
+        </geteos>
+        
+        <seteotenable cmd="eot_enable" mode="both">
+            <params>
+                <param type="bit"/>
+            </params>
+            <answer></answer>
+            <return>
+                <error>-1</error>
+            </return>
+        </seteotenable>
+        
+        <geteotenable cmd="eot_enable" mode="both">
+            <params></params>
+            <answer>
+                <separator>s</separator>
+                <param type="bit" id="0"/>
+            </answer>
+            <return>
+                <error>-1</error>
+                <std>
+                    <id>0</id>
+                </std>
+                <other></other>
+            </return>
+        </geteotenable>
+        
+        <seteotchar cmd="eot_char" mode="both">
+            <params>
+                <param type="limit">
+                    <from>0</from>
+                    <upto>255</upto>
+                </param>
+            </params>
+            <answer></answer>
+            <return>
+                <error>-1</error>
+            </return>
+        </seteotchar>
+        
+        <geteotchar cmd="eot_char" mode="both">
+            <params></params>
+            <answer>
+                <separator>s</separator>
+                <param type="limit" id="0">
+                    <from>0</from>
+                    <upto>255</upto>
+                </param>
+            </answer>
+            <return>
+                <error>-1</error>
+                <std>
+                    <id>0</id>
+                </std>
+                <other></other>
+            </return>
+        </geteotchar>
+        
+        <!-- MORE -->
+        
+        <setlon cmd="lon" mode="device">
+            <params>
+                <param type="bit"/>
+            </params>
+            <answer></answer>
+            <return>
+                <error>-1</error>
+            </return>
+        </setlon>
+        
+        <getlon cmd="lon" mode="device">
+            <params></params>
+            <answer>
+                <separator>s</separator>
+                <param type="bit" id="0"/>
+            </answer>
+            <return>
+                <error>-1</error>
+                <std>
+                    <id>0</id>
+                </std>
+            </return>
+            <other></other>
+        </getlon>
+        
+        <setmode cmd="mode" mode="both">
+            <params>
+                <param type="bit"/>
+            </params>
+            <answer></answer>
+            <return>
+                <error>-1</error>
+            </return>
+        </setmode>       
+        
+        <getmode cmd="mode" mode="both">
+            <params></params>
+            <answer>
+                <separator>s</separator>
+                <param type="bit" id="0"/>
+            </answer>
+            <return>
+                <error>-1</error>
+                <std>
+                    <id>0</id>
+                </std>
+                <other></other>
+            </return>
+        </getmode>
+        
+        <!-- MORE -->
+        <ver cmd="ver" mode="both">
+            <params></params>
+            <answer>
+                <str/>
+            </answer>
+            <return>
+                <error>-1</error>
+            </return>
+        </ver>
+    </commands>
+</adapter>

@@ -27,29 +27,34 @@
 #include <errno.h>
 #include <termios.h>
 
-#ifndef COMMON_H
-#define	COMMON_H
+#include "aderror.h"
 
-#define BAUDRATE B115200
-#define _POSIX_SOURCE 1
+#ifndef ADAPTERS_LOWLEVEL_H
+#define	ADAPTERS_LOWLEVEL_H
 
 #ifdef	__cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-  extern int f_serial;
-  extern struct termios tio_serial;
+    /*    typedef enum {
+            AD_SERIAL_SUCCESS = 0,
+            AD_SERIAL_ERR_IO,       
+        } ad_serial_error_t;*/
 
-  int HPIB_serial_config (char *tty, int timeout);
-  int HPIB_prologix_config ();
-  int HPIB_serial_close ();
-  int HPIB_serial_read_until (char *buf, int len, char until);
-  int HPIB_serial_write (char *string);
-  int HPIB_serial_read_char (char *c);
-  
+    typedef struct {
+        int f_serial;
+        ad_error_t aderror;
+    } ad_serial_t;
+
+    int ad_serial_config(ad_serial_t *ser, char *tty, int timeout, int baudrate);
+    int ad_serial_read_until(ad_serial_t *ser, char *buf, int len, char until);
+    int ad_serial_read_char(ad_serial_t *ser, char *c);
+    int ad_serial_write(ad_serial_t *ser, char *string);
+    int ad_serial_close(ad_serial_t *ser);
+
 #ifdef	__cplusplus
 }
 #endif
 
-#endif				/* COMMON_H */
+#endif	/* ADAPTERS_LOWLEVEL_H */
+

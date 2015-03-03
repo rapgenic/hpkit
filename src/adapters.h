@@ -19,56 +19,104 @@
 
 #include "config.h"
 
-#include "adapters_common.h"
-#include "prologix_proto.h"
+#include <stdarg.h>
+#include <stdio.h>
+#include <error.h>
+#include <regex.h>
+#include <string.h>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+#include <libxml/xpath.h>
 
-#define TRUE 1
-#define FALSE 0
+#include "aderror.h"
+#include "adapters_lowlevel.h"
 
 #ifndef ADAPTERS_H
 #define	ADAPTERS_H
 
+/*#define FILE_BUFFER 10000
+
+#define SET 1
+#define GET 0
+*/
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-    typedef enum {
-        AD_PROLOGIX = 0,
-    } adapters_t;
+#define _AD_SAVE_ERROR_INFO sprintf(ad->aderror_info, "In %s: function %s (near line %d)", __FILE__, __func__, __LINE__)
+    
+#define AD_SAVE_ERROR_INFO(x) sprintf(x.aderror_info, "In %s: function %s (near line %d)", __FILE__, __func__, __LINE__)
 
-    int set_adapter(adapters_t ad);
+#define _NOT(x, y) if(x == ad_get_curr_errcode(&)) return 0; else return x; 
+    
+    typedef struct {
+        char __answer[BUF_MAXLEN];
+        char *__answer_strtok_t;
+        char __answer_separator;
+        int __curr_err_ret_val;
+    } __ad_temp_vars_t;
 
-    int (*ad_set_address)(int pad, int sad);
-    int (*ad_get_address)(int *returnsad);
-    int (*ad_set_auto)(int val);
-    int (*ad_get_auto)();
-    int (*ad_clr)();
-    int (*ad_set_eoi)(int val);
-    int (*ad_get_eoi)();
-    int (*ad_set_eos)(ad_eos_t mode);
-    ad_eos_t (*ad_get_eos)();
-    int (*ad_set_eot_enable)(int val);
-    int (*ad_get_eot_enable)();
-    int (*ad_set_eot_char)(int c);
-    int (*ad_get_eot_char)();
-    int (*ad_ifc)();
-    int (*ad_llo)();
-    int (*ad_loc)();
-    int (*ad_set_lon)(int val);
-    int (*ad_get_lon)();
-    int (*ad_set_mode)(ad_mode_t mode);
-    ad_mode_t(*ad_get_mode)();
-    int (*ad_read)(char *buf, char until);
-    int (*ad_read_tmo_ms)(int time);
-    int (*ad_rst)();
-    int (*ad_set_savecfg)(int val);
-    int (*ad_get_savecfg)();
-    int (*ad_spoll)(int pad, int sad);
-    int (*ad_srq)();
-    int (*ad_set_status)(int dsb);
-    int (*ad_status)();
-    int (*ad_trg)(char *buf, char *list);
-    int (*ad_ver)(char *buf);
+    typedef struct {
+        char prefix[STR_MAXLEN];
+        char syntax[STR_MAXLEN];
+        int baudrate;
+    } ad_conf_t;
+
+    typedef struct {
+        __ad_temp_vars_t __ad_temp_vars;
+        xmlDoc *doc;
+        xmlXPathContext *xpath_context;
+        ad_error_t aderror;
+        ad_error_info_t aderror_info;
+        ad_conf_t ad_conf;
+        ad_serial_t ad_serial;
+    } adapter_t;
+
+    static xmlAttr* _ad_find_node_attr_by_name(xmlAttr *attr, char *name);
+    static int _ad_command_compile(adapter_t *ad, char *command_name, size_t count, int values[], char *_command);
+    static int _ad_command_read_answer(adapter_t *ad, char *command_name, char *_answer);
+
+    int ad_config(adapter_t *ad, char *filename, char *tty, int timeout);
+    int __ad_command(adapter_t *ad, char *command_name, size_t count, int values[]) __attribute__ ((warn_unused_result));
+    int ad_get_next_answer(adapter_t *ad);
+    inline int ad_get_curr_errcode(adapter_t *ad);
+    int ad_get_const(adapter_t *ad, char *const_name);
+    int ad_close(adapter_t *ad);
+
+#define _ad_command(x, y, ...) __ad_command (x, y, sizeof ((int []){ __VA_ARGS__ }) / sizeof (int), (int []){ __VA_ARGS__ })
+
+#define ad_set_address(x, ...)      _ad_command(x, "/adapter/commands/setaddress",  __VA_ARGS__)
+#define ad_get_address(x, ...)      _ad_command(x, "/adapter/commands/getaddress",  __VA_ARGS__)
+#define ad_set_auto(x, ...)         _ad_command(x, "/adapter/commands/setauto",     __VA_ARGS__)
+#define ad_get_auto(x, ...)         _ad_command(x, "/adapter/commands/getauto",     __VA_ARGS__)
+#define ad_clr(x, ...)              _ad_command(x, "/adapter/commands/clr",         __VA_ARGS__)
+#define ad_set_eoi(x, ...)          _ad_command(x, "/adapter/commands/seteoi",      __VA_ARGS__)
+#define ad_get_eoi(x, ...)          _ad_command(x, "/adapter/commands/geteoi",      __VA_ARGS__)
+#define ad_set_eos(x, ...)          _ad_command(x, "/adapter/commands/seteos",      __VA_ARGS__)
+#define ad_get_eos(x, ...)          _ad_command(x, "/adapter/commands/geteos",      __VA_ARGS__)
+#define ad_set_eot_enable(x, ...)   _ad_command(x, "/adapter/commands/seteotenable",__VA_ARGS__)
+#define ad_get_eot_enable(x, ...)   _ad_command(x, "/adapter/commands/geteotenable",__VA_ARGS__)
+#define ad_set_eot_char(x, ...)     _ad_command(x, "/adapter/commands/seteotchar",  __VA_ARGS__)
+#define ad_get_eot_char(x, ...)     _ad_command(x, "/adapter/commands/geteotchar",  __VA_ARGS__)
+#define ad_ifc(x, ...)              _ad_command(x, "/adapter/commands/ifc",         __VA_ARGS__)
+#define ad_llo(x, ...)              _ad_command(x, "/adapter/commands/llo",         __VA_ARGS__)
+#define ad_loc(x, ...)              _ad_command(x, "/adapter/commands/loc",         __VA_ARGS__)
+#define ad_set_lon(x, ...)          _ad_command(x, "/adapter/commands/setlon",      __VA_ARGS__)
+#define ad_get_lon(x, ...)          _ad_command(x, "/adapter/commands/getlon",      __VA_ARGS__)
+#define ad_set_mode(x, ...)         _ad_command(x, "/adapter/commands/setmode",     __VA_ARGS__)
+#define ad_get_mode(x, ...)         _ad_command(x, "/adapter/commands/getmode",     __VA_ARGS__)
+#define ad_read(x, ...)             _ad_command(x, "/adapter/commands/read",        __VA_ARGS__)
+#define ad_set_read_tmo_ms(x, ...)  _ad_command(x, "/adapter/commands/setreadtmoms",__VA_ARGS__)
+#define ad_get_read_tmo_ms(x, ...)  _ad_command(x, "/adapter/commands/getreadtmoms",__VA_ARGS__)
+#define ad_rst(x, ...)              _ad_command(x, "/adapter/commands/rst",         __VA_ARGS__)
+#define ad_set_savecfg(x, ...)      _ad_command(x, "/adapter/commands/setsavecfg",  __VA_ARGS__)
+#define ad_get_savecfg(x, ...)      _ad_command(x, "/adapter/commands/getsavecfg",  __VA_ARGS__)
+#define ad_spoll(x, ...)            _ad_command(x, "/adapter/commands/spoll",       __VA_ARGS__)
+#define ad_srq(x, ...)              _ad_command(x, "/adapter/commands/srq",         __VA_ARGS__)
+#define ad_set_status(x, ...)       _ad_command(x, "/adapter/commands/setstatus",   __VA_ARGS__)
+#define ad_get_status(x, ...)       _ad_command(x, "/adapter/commands/getstatus",   __VA_ARGS__)
+#define ad_trg(x, ...)              _ad_command(x, "/adapter/commands/trg",         __VA_ARGS__)
+#define ad_ver(x, ...)              _ad_command(x, "/adapter/commands/ver",         __VA_ARGS__)
 
 #ifdef	__cplusplus
 }

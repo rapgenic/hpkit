@@ -14,6 +14,7 @@
 
 @SET_MAKE@
 
+
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
 am__make_running_with_option = \
@@ -94,29 +95,34 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__installdirs = "$(DESTDIR)$(bindir)"
+am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(sysconfdir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
-am_hplisten_OBJECTS = src/hpib.$(OBJEXT) src/common.$(OBJEXT) \
-	src/adapters.$(OBJEXT) src/prologix_proto.$(OBJEXT) \
+am_hplisten_OBJECTS = src/common.$(OBJEXT) src/aderror.$(OBJEXT) \
+	src/adapters.$(OBJEXT) src/adapters_lowlevel.$(OBJEXT) \
 	src/hplisten.$(OBJEXT)
 hplisten_OBJECTS = $(am_hplisten_OBJECTS)
 hplisten_LDADD = $(LDADD)
-am_hplot_OBJECTS = src/hpib.$(OBJEXT) src/proto.$(OBJEXT) \
-	src/common.$(OBJEXT) src/adapters.$(OBJEXT) \
-	src/prologix_proto.$(OBJEXT) src/hplot.$(OBJEXT)
+am__DEPENDENCIES_1 =
+hplisten_DEPENDENCIES = $(am__DEPENDENCIES_1)
+am_hplot_OBJECTS = src/common.$(OBJEXT) src/aderror.$(OBJEXT) \
+	src/adapters.$(OBJEXT) src/adapters_lowlevel.$(OBJEXT) \
+	src/hplot.$(OBJEXT)
 hplot_OBJECTS = $(am_hplot_OBJECTS)
 hplot_LDADD = $(LDADD)
-am_hprologix_OBJECTS = src/hpib.$(OBJEXT) src/common.$(OBJEXT) \
-	src/adapters.$(OBJEXT) src/prologix_proto.$(OBJEXT) \
+hplot_DEPENDENCIES = $(am__DEPENDENCIES_1)
+am_hprologix_OBJECTS = src/common.$(OBJEXT) src/aderror.$(OBJEXT) \
+	src/adapters.$(OBJEXT) src/adapters_lowlevel.$(OBJEXT) \
 	src/hprologix.$(OBJEXT)
 hprologix_OBJECTS = $(am_hprologix_OBJECTS)
 hprologix_LDADD = $(LDADD)
-am_hptalk_OBJECTS = src/hpib.$(OBJEXT) src/common.$(OBJEXT) \
-	src/adapters.$(OBJEXT) src/prologix_proto.$(OBJEXT) \
+hprologix_DEPENDENCIES = $(am__DEPENDENCIES_1)
+am_hptalk_OBJECTS = src/common.$(OBJEXT) src/aderror.$(OBJEXT) \
+	src/adapters.$(OBJEXT) src/adapters_lowlevel.$(OBJEXT) \
 	src/hptalk.$(OBJEXT)
 hptalk_OBJECTS = $(am_hptalk_OBJECTS)
 hptalk_LDADD = $(LDADD)
+hptalk_DEPENDENCIES = $(am__DEPENDENCIES_1)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -154,6 +160,34 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
+DATA = $(sysconf_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) \
 	$(LISP)config.h.in
 # Read a list of newline-separated strings from the standard input,
@@ -234,10 +268,15 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
+XML_CFLAGS = @XML_CFLAGS@
+XML_LIBS = @XML_LIBS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -275,40 +314,50 @@ psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
-sysconfdir = @sysconfdir@
+
+#test_SOURCES = \
+#	src/aderror.c        \
+#	src/adapters.c       \
+#	src/adapters_lowlevel.c\
+#	src/test.c
+sysconfdir = $(prefix)/etc/hpkit.d/
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 hplot_SOURCES = \
-	src/hpib.c	     \
-	src/proto.c	     \
 	src/common.c	     \
-	src/adapters.c	     \
-	src/prologix_proto.c \
+	src/aderror.c        \
+	src/adapters.c       \
+	src/adapters_lowlevel.c\
 	src/hplot.c
 
 hplisten_SOURCES = \
-	src/hpib.c	     \
 	src/common.c	     \
-	src/adapters.c	     \
-	src/prologix_proto.c \
+	src/aderror.c        \
+	src/adapters.c       \
+	src/adapters_lowlevel.c\
 	src/hplisten.c
 
 hptalk_SOURCES = \
-	src/hpib.c	     \
 	src/common.c	     \
-	src/adapters.c	     \
-	src/prologix_proto.c \
+	src/aderror.c        \
+	src/adapters.c       \
+	src/adapters_lowlevel.c\
 	src/hptalk.c
 
 hprologix_SOURCES = \
-	src/hpib.c	     \
 	src/common.c	     \
+	src/aderror.c        \
 	src/adapters.c       \
-	src/prologix_proto.c \
+	src/adapters_lowlevel.c\
 	src/hprologix.c
 
+sysconf_DATA = \
+	src/adapters/prologix.conf.xml
+
+LDADD = $(XML_LIBS)
+AM_CPPFLAGS = $(XML_CFLAGS) -DDATA_PATH=\"$(sysconfdir)\"
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -411,12 +460,13 @@ src/$(am__dirstamp):
 src/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/$(DEPDIR)
 	@: > src/$(DEPDIR)/$(am__dirstamp)
-src/hpib.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/common.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
+src/aderror.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/adapters.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
-src/prologix_proto.$(OBJEXT): src/$(am__dirstamp) \
+src/adapters_lowlevel.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hplisten.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
@@ -424,7 +474,6 @@ src/hplisten.$(OBJEXT): src/$(am__dirstamp) \
 hplisten$(EXEEXT): $(hplisten_OBJECTS) $(hplisten_DEPENDENCIES) $(EXTRA_hplisten_DEPENDENCIES) 
 	@rm -f hplisten$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(hplisten_OBJECTS) $(hplisten_LDADD) $(LIBS)
-src/proto.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/hplot.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 
 hplot$(EXEEXT): $(hplot_OBJECTS) $(hplot_DEPENDENCIES) $(EXTRA_hplot_DEPENDENCIES) 
@@ -451,14 +500,13 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/adapters.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/adapters_lowlevel.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/aderror.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/common.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hpib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hplisten.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hplot.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hprologix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hptalk.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/prologix_proto.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/proto.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -475,6 +523,27 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+install-sysconfDATA: $(sysconf_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(sysconf_DATA)'; test -n "$(sysconfdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(sysconfdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(sysconfdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(sysconfdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(sysconfdir)" || exit $$?; \
+	done
+
+uninstall-sysconfDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(sysconf_DATA)'; test -n "$(sysconfdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(sysconfdir)'; $(am__uninstall_files_from_dir)
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -700,9 +769,9 @@ distcleancheck: distclean
 	       exit 1; } >&2
 check-am: all-am
 check: check-am
-all-am: Makefile $(PROGRAMS) config.h
+all-am: Makefile $(PROGRAMS) $(DATA) config.h
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(sysconfdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -766,7 +835,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-binPROGRAMS
+install-exec-am: install-binPROGRAMS install-sysconfDATA
 
 install-html: install-html-am
 
@@ -807,7 +876,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS
+uninstall-am: uninstall-binPROGRAMS uninstall-sysconfDATA
 
 .MAKE: all install-am install-strip
 
@@ -822,11 +891,11 @@ uninstall-am: uninstall-binPROGRAMS
 	install-data-am install-dvi install-dvi-am install-exec \
 	install-exec-am install-html install-html-am install-info \
 	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	install-ps install-ps-am install-strip install-sysconfDATA \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic pdf pdf-am ps ps-am tags tags-am uninstall \
-	uninstall-am uninstall-binPROGRAMS
+	uninstall-am uninstall-binPROGRAMS uninstall-sysconfDATA
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

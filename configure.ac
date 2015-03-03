@@ -4,13 +4,14 @@
 AC_PREREQ([2.69])
 AC_INIT([HPkit], [0.2.1], [giulio@rapgenic.com], [hpkit], [www.rapgenic.com/hpkit])
 AM_INIT_AUTOMAKE([subdir-objects])
-AC_CONFIG_SRCDIR([src/proto.h])
+AC_CONFIG_SRCDIR([src/])
 AM_CONFIG_HEADER([config.h])
 
 # Checks for programs.
 AC_PROG_CC
 
 # Checks for libraries.
+PKG_CHECK_MODULES(XML, libxml-2.0 >= 2.4)
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h stdlib.h string.h termios.h unistd.h])

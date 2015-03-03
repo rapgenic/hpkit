@@ -25,12 +25,11 @@
 #define	COMMON_H
 
 #ifdef	__cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-  int version (char *progname);
-  int help ();
+    int version(char *progname);
+    int help();
 
 #ifdef	__cplusplus
 }

@@ -20,24 +20,24 @@
 #include "common.h"
 
 int
-version (char *progname)
+version(char *progname)
 {
-  printf ("%s (%s) %s\n", progname, PACKAGE_NAME, VERSION);
-  puts ("\
+    printf("%s (%s) %s\n", progname, PACKAGE_NAME, VERSION);
+    puts("\
 Copyright © 2015 Giulio Girardi.\n\
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.\n\
 This is free software: you are free to change and redistribute it.\n\
 There is NO WARRANTY, to the extent permitted by law.\n");
 
-  return 1;
+    return 1;
 }
 
 int
-help ()
+help()
 {
-  printf ("\
+    printf("\
 Report bugs to: %s\n\
 Package home page: <%s>\n", PACKAGE_BUGREPORT, PACKAGE_URL);
 
-  return 1;
+    return 1;
 }

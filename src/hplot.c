@@ -23,131 +23,134 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "hpib.h"
-#include "proto.h"
-#include "prologix_proto.h"
 #include "adapters.h"
 #include "common.h"
 
 #define PROGRAM_NAME "hplot"
 
 int
-check_adapter_options ()
+_ad_plot_proto_response_required(char *buf)
 {
-  if (ad_get_mode () == MD_CONTROLLER)
-    ad_set_mode (MD_DEVICE);
+    int x = strlen(buf) - 1;
 
-  if (ad_get_lon ())
-    ad_set_lon (FALSE);
+    if (buf[x] == '\n' && buf[x - 1] == '\r' && buf[x - 2] != ';') {
+        return 1;
+    }
+
+    return 0;
+}
+
+void
+_ad_plot_proto_get_command(char *buf, char cmd[2])
+{
+    int x = strlen(buf) - 1;
+
+    cmd[0] = buf[x - 3];
+    cmd[1] = buf[x - 2];
 }
 
 int
-main (int argc, char **argv)
+main(int argc, char **argv)
 {
-  // temp vars
-  char buf[BUF_MAXLEN];
-  int c, d;
-  char *endptr, *endptr_s;
-  char *pad_temp, *sad_temp;
+    // temp vars
+    char buf[BUF_MAXLEN];
+    int c, d;
+    char temp[STR_MAXLEN];
+    char *endptr, *endptr_s;
+    char *pad_temp, *sad_temp;
 
-  // default values
-  char tty[STR_MAXLEN] = "/dev/ttyUSB0";
-  FILE *f_output = NULL;
-  int using_output_file = 0;
-  int config_adapter = 1;
-  char output_path[STR_MAXLEN] = "";
-  int timeout = 20;
-  int ad_address = 5;
-  int ad_saddress = PROLOGIX_NONE;
+    // default values
+    char tty[STR_MAXLEN] = "/dev/ttyUSB0";
+    FILE *f_output = NULL;
+    int using_output_file = 0;
+    int config_adapter = 1;
+    char output_path[STR_MAXLEN] = "";
+    int timeout = 20;
+    int ad_address = 5;
+    int ad_saddress = -1;
+    char config_file[STR_MAXLEN] = "prologix";
 
-  set_adapter (AD_PROLOGIX);
+    // the adapter
+    adapter_t ad;
 
-  // arguments parsing
-  while (1)
-    {
-      static struct option long_options[] = {
-        {"device", required_argument, 0, 'd'},
-        {"adapter", required_argument, 0, 'a'},
-        {"address", required_argument, 0, 'r'},
-        {"output", required_argument, 0, 'o'},
-        {"timeout", required_argument, 0, 't'},
-        {"help", no_argument, 0, 'h'},
-        {"version", no_argument, 0, 'v'},
-        {0, 0, 0, 0}
-      };
+    // arguments parsing
+    while (1) {
+        static struct option long_options[] = {
+            {"device", required_argument, 0, 'd'},
+            {"adapter", required_argument, 0, 'a'},
+            {"address", required_argument, 0, 'r'},
+            {"output", required_argument, 0, 'o'},
+            {"timeout", required_argument, 0, 't'},
+            {"help", no_argument, 0, 'h'},
+            {"version", no_argument, 0, 'v'},
+            {0, 0, 0, 0}
+        };
 
-      int option_index = 0;
+        int option_index = 0;
 
-      c = getopt_long (argc, argv, "d:a:r:o:t:hv", long_options, &option_index);
+        c = getopt_long(argc, argv, "d:a:r:o:t:hv", long_options, &option_index);
 
-      if (c == -1)
-        break;
+        if (c == -1)
+            break;
 
-      switch (c)
-        {
+        switch (c) {
         case 'd':
-          memset (tty, 0, STR_MAXLEN);
-          memcpy (tty, optarg, strlen (optarg));
-          break;
+            strcpy(tty, optarg);
+            break;
 
         case 'a':
-          if (strcmp (optarg, "prologix") == 0)
-            set_adapter (AD_PROLOGIX);
-          else if (strcmp (optarg, "none") == 0)
-            config_adapter = 0;
-          else
-            {
-              printf ("%s: non valid option -- \"%s\"\nChoosing 'prologix'\n", PROGRAM_NAME, optarg);
-              set_adapter (AD_PROLOGIX);
-            }
-          break;
+            if (optarg != "")
+                strcpy(config_file, optarg);
+            break;
 
         case 'r':
-          pad_temp = strtok (optarg, ",");
-          sad_temp = strtok (NULL, ",");
+            pad_temp = strtok(optarg, ",");
+            sad_temp = strtok(NULL, ",");
 
-          ad_address = strtol (pad_temp, &endptr, 10);
-
-          if (*endptr != '\0')
-            {
-              printf ("%s: non valid option -- \"%s\"\n", PROGRAM_NAME, pad_temp);
-              return (EXIT_FAILURE);
+            ad_address = strtol(pad_temp, &endptr, 10);
+            if (*endptr != '\0') {
+                AD_SAVE_ERROR_INFO(ad);
+                fprintf(stderr, "%s\n\tWhile processing -r|--address: Non valid option\n", ad.aderror_info);
+                return EXIT_FAILURE;
             }
 
-          if (sad_temp != NULL)
-            {
-              ad_saddress = strtol (sad_temp, &endptr_s, 10);
-
-              if (*endptr_s != '\0')
-                {
-                  printf ("%s: non valid option -- \"%s\"\n", PROGRAM_NAME, sad_temp);
-                  return (EXIT_FAILURE);
+            if (sad_temp != NULL) {
+                ad_saddress = strtol(sad_temp, &endptr_s, 10);
+                if (*endptr_s != '\0') {
+                    AD_SAVE_ERROR_INFO(ad);
+                    fprintf(stderr, "%s\n\tWhile processing -r|--address: Non valid option\n", ad.aderror_info);
+                    return EXIT_FAILURE;
                 }
             }
-          break;
+            break;
 
         case 'o':
-          memcpy (output_path, optarg, strlen (optarg));
-          using_output_file = 1;
-          break;
+            strcpy(output_path, optarg);
+            using_output_file = 1;
+            break;
 
         case 't':
-          d = atoi (optarg) / 100;
-
-          if (d == 0)
-            {
-              printf ("%s: non valid option -- \"%s\"\n", PROGRAM_NAME, optarg);
-              return (EXIT_FAILURE);
+            d = strtol(optarg, &endptr, 10);
+            if (*endptr != '\0') {
+                AD_SAVE_ERROR_INFO(ad);
+                fprintf(stderr, "%s\n\tWhile processing -t|--timeout: Non valid option\n", ad.aderror_info);
+                return EXIT_FAILURE;
             }
 
-          timeout = d;
-          break;
+            if (d < 100) {
+                AD_SAVE_ERROR_INFO(ad);
+                fprintf(stderr, "%s\n\tWhile processing -t|--timeout: Non valid option\n", ad.aderror_info);
+                return EXIT_FAILURE;
+            }
+
+            timeout = d / 100;
+            break;
 
         case 'h':
-          puts ("\
+            puts("\
 Usage: hplot [OPTIONS]...\n\
 Dump or save plot data sent by HP instrument's GPIB interface\n");
-          puts ("\
+            puts("\
   -d, --device=STRING       communicate with serial interface defined by STRING;\n\
                             default: '/dev/ttyUSB0'\n\
   -a, --adapter=ADAPTER     set the adapter used to communicate with the\n\
@@ -160,82 +163,159 @@ Dump or save plot data sent by HP instrument's GPIB interface\n");
                             2000, min: 100\n\
   -h, --help                show this help and exit\n\
   -v, --version             show information about program version and exit\n");
-          puts ("\
+            puts("\
 ADAPTER stands for the adapter you are using. Supported adapters are:\n\
   prologix                  the Prologix adapter, fully supported\n\
   none                      don't configure the adapter (it will also disable\n\
                             the -r|--address option)\n\
 \nMore adapters may be added in the future\n");
-          help ();
-          return (EXIT_SUCCESS);
-          break;
+            help();
+            return (EXIT_SUCCESS);
+            break;
 
         case 'v':
-          version (PROGRAM_NAME);
-          return (EXIT_SUCCESS);
-          break;
+            version(PROGRAM_NAME);
+            return (EXIT_SUCCESS);
+            break;
 
         case '?':
-          puts ("\n\
+            puts("\n\
 Usage: hplot [OPTIONS]...\n\
 Dump or save plot data sent by HP instrument's GPIB interface");
-          return (EXIT_FAILURE);
+            return (EXIT_FAILURE);
 
         default:
-          abort ();
+            abort();
         }
     }
 
-  // check whether the serial port is available and configure it
-  if (!HPIB_serial_config (tty, timeout))
-    {
-      HPIB_serial_close ();
-      return (EXIT_FAILURE);
+    strcpy(temp, DATA_PATH);
+    strcat(temp, config_file);
+    strcat(temp, ".conf.xml");
+
+    if (!ad_config(&ad, temp, tty, timeout)) {
+        AD_SAVE_ERROR_INFO(ad);
+        paderror(ad.aderror, "While configuring the adapter", ad.aderror_info);
+        ad_close(&ad);
+        return EXIT_FAILURE;
     }
 
-  // check and config adapter's settings
-  if (config_adapter)
-    {
-      check_adapter_options ();
-      ad_set_address (ad_address, ad_saddress);
-    }
+    // check and config adapter's settings
+    if (config_adapter) {
+        int mode = -1;
+        int lon = -1;
 
-  // open the output file
-  if (using_output_file)
-    {
-      f_output = fopen (output_path, "w");
+        mode = ad_get_mode(&ad);
 
-      if (f_output == NULL)
-        {
-          perror (output_path);
-          HPIB_serial_close ();
-          return (EXIT_FAILURE);
+        if (mode != ad_get_curr_errcode(&ad))
+            if (mode == ad_get_const(&ad, "MD_CONTROLLER"))
+                if (ad_set_mode(&ad, ad_get_const(&ad, "MD_DEVICE")) == ad_get_curr_errcode(&ad)) {
+                    AD_SAVE_ERROR_INFO(ad);
+                    paderror(ad.aderror, "While configuring the adapter", ad.aderror_info);
+                    ad_close(&ad);
+                    return EXIT_FAILURE;
+                }
+
+        lon = ad_get_lon(&ad);
+
+        if (lon != ad_get_curr_errcode(&ad)) {
+            if (lon == ad_get_const(&ad, "ENABLED")) {
+                if (ad_set_lon(&ad, ad_get_const(&ad, "DISABLED")) == ad_get_curr_errcode(&ad)) {
+                    AD_SAVE_ERROR_INFO(ad);
+                    paderror(ad.aderror, "While configuring the adapter", ad.aderror_info);
+                    ad_close(&ad);
+                    return EXIT_FAILURE;
+                }
+            }
+        } else {
+            AD_SAVE_ERROR_INFO(ad);
+            paderror(ad.aderror, "While configuring the adapter", ad.aderror_info);
+            ad_close(&ad);
+            return EXIT_FAILURE;
+        }
+
+
+        if (ad_saddress != -1) {
+            if (ad_set_address(&ad, ad_address, ad_saddress) == ad_get_curr_errcode(&ad)) {
+                AD_SAVE_ERROR_INFO(ad);
+                paderror(ad.aderror, "While configuring the adapter", ad.aderror_info);
+                ad_close(&ad);
+                return EXIT_FAILURE;
+            }
+        } else {
+            if (ad_set_address(&ad, ad_address) == ad_get_curr_errcode(&ad)) {
+                AD_SAVE_ERROR_INFO(ad);
+                paderror(ad.aderror, "While configuring the adapter", ad.aderror_info);
+                ad_close(&ad);
+                return EXIT_FAILURE;
+            }
         }
     }
 
-  // main loop
-  while (1)
-    {
-      // read the serial
-      if (!HPIB_serial_read_until (buf, BUF_MAXLEN, '\n'))
-        break;
+    // open the output file
+    if (using_output_file) {
+        f_output = fopen(output_path, "w");
 
-      // print the output
-      if (using_output_file)
-        fprintf (f_output, "%s", buf);
-      else
-        printf ("%s", buf);
-
-      // parse the buffer read and answer to the instrument
-      HPIB_proto_parse (buf);
+        if (f_output == NULL) {
+            AD_SAVE_ERROR_INFO(ad);
+            paderror(ad.aderror, "While opening the output file", ad.aderror_info);
+            ad_close(&ad);
+            return EXIT_FAILURE;
+        }
     }
 
-  // close the devicse
-  HPIB_serial_close ();
+    // main loop
+    while (1) {
+        // read the serial
+        if (!ad_serial_read_until(&ad.ad_serial, buf, BUF_MAXLEN, '\n'))
+            break;
 
-  if (using_output_file)
-    fclose (f_output);
+        // print the output
+        if (using_output_file)
+            fprintf(f_output, "%s", buf);
+        else
+            printf("%s", buf);
 
-  // end
-  return (EXIT_SUCCESS);
+        // parse the buffer read and answer to the instrument
+        if (_ad_plot_proto_response_required(buf)) {
+            char cmd[2];
+            char response[STR_MAXLEN] = "";
+
+            _ad_plot_proto_get_command(buf, cmd);
+
+            if (strncmp(cmd, "OE", 2) == 0) {
+                strcpy(response, "0\r\n");
+            } else if (strncmp(cmd, "OH", 2) == 0) {
+                strcpy(response, "250,279,10250,7479\r\n");
+            } else if (strncmp(cmd, "OI", 2) == 0) {
+                strcpy(response, "7470A\r\n");
+            } else if (strncmp(cmd, "OP", 2) == 0) {
+                strcpy(response, "250,279,10250,7479\r\n");
+            } else if (strncmp(cmd, "OO", 2) == 0) {
+                strcpy(response, "0,1,0,0,0,0,0,0\r\n");
+            } else if (strncmp(cmd, "OF", 2) == 0) {
+                strcpy(response, "40,40\r\n");
+            } else if (strncmp(cmd, "OA", 2) == 0) {
+                strcpy(response, "250,279,0\r\n");
+            } else if (strncmp(cmd, "OC", 2) == 0) {
+                strcpy(response, "250,279,0\r\n");
+            }
+
+            if (!ad_serial_write(&ad.ad_serial, response)) {
+                AD_SAVE_ERROR_INFO(ad);
+                paderror(ad.aderror, "While opening the output file", ad.aderror_info);
+                ad_close(&ad);
+                return EXIT_FAILURE;
+            }
+        }
+    }
+
+    // close the devicse
+    ad_close(&ad);
+
+    if (using_output_file)
+        fclose(f_output);
+
+    // end
+    return EXIT_SUCCESS;
 }

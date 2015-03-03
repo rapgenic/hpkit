@@ -23,204 +23,186 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "hpib.h"
-#include "prologix_proto.h"
 #include "adapters.h"
 #include "common.h"
 
 #define PROGRAM_NAME "hprologix"
 
-#define PROLOGIX_D_MODE MD_CONTROLLER
+#define PROLOGIX_D_MODE "MD_CONTROLLER"
 #define PROLOGIX_D_ADDR 20
-#define PROLOGIX_D_AUTO 1
-#define PROLOGIX_D_CEOI 0
-#define PROLOGIX_D_CEOT -1
-#define PROLOGIX_D_CEOS EO_CRLF
+#define PROLOGIX_D_SADD -1
+#define PROLOGIX_D_AUTO "ENABLED"
+#define PROLOGIX_D_CEOI "DISABLED"
+#define PROLOGIX_D_CEOT "DISABLED"
+#define PROLOGIX_D_EOTC '\0'
+#define PROLOGIX_D_CEOS "EO_CRLF"
 
-typedef enum
-{
-  SIG_IFC = 0,
-  SIG_CLR,
-  SIG_LOC,
-  SIG_SRQ,
-  SIG_SPL,
-  SIG_RST
+#define PROLOGIX_VERSION_STR "Prologix GPIB-USB Controller version 6.107\r\n" 
+
+typedef enum {
+    SIG_IFC = 0,
+    SIG_CLR,
+    SIG_LOC,
+    SIG_SRQ,
+    SIG_SPL,
+    SIG_RST
 } prologix_signal_t;
 
 int
-main (int argc, char **argv)
+main(int argc, char **argv)
 {
-  // temp vars
-  int c;
-  char *endptr, *endptr_s;
-  char *pad_temp, *sad_temp;
+    // temp vars
+    int c;
+    char *endptr, *endptr_s;
+    char *pad_temp, *sad_temp;
 
-  // default values
-  char tty[STR_MAXLEN] = "/dev/ttyUSB0";
-  int get = 0;
-  int default_values = 1;
+    // default values
+    char tty[STR_MAXLEN] = "/dev/ttyUSB0";
+    char config_file[STR_MAXLEN];
+    int get = 0;
 
-  // set the default adapter
-  set_adapter (AD_PROLOGIX);
+    // adapter
+    adapter_t ad;
 
-  // adapter default options
-  int p_mode = PROLOGIX_D_MODE;
-  int p_padd = PROLOGIX_D_ADDR;
-  int p_sadd = PROLOGIX_NONE;
-  int p_auto = PROLOGIX_D_AUTO;
-  int p_ceoi = PROLOGIX_D_CEOI;
-  int p_ceot = PROLOGIX_D_CEOT;
-  int p_ceos = PROLOGIX_D_CEOS;
-  int p_sign = PROLOGIX_NONE;
+    // adapter default options
+    int p_mode = -1;
+    int p_padd = -1;
+    int p_sadd = -1;
+    int p_auto = -1;
+    int p_ceoi = -1;
+    int p_ceot = -1;
+    int p_ceos = -1;
+    int p_sign = -1;
 
-  // arguments parsing
-  while (1)
-    {
-      static struct option long_options[] = {
-        {"device", required_argument, 0, 'd'},
-        {"get-config", no_argument, 0, 'g'},
-        {"mode", required_argument, 0, 'm'},
-        {"address", required_argument, 0, 'r'},
-        {"autoread", required_argument, 0, 'a'},
-        {"eoi", required_argument, 0, 'e'},
-        {"eot", required_argument, 0, 't'},
-        {"eos", required_argument, 0, 's'},
-        {"signal", required_argument, 0, 'n'},
-        {"help", no_argument, 0, 'h'},
-        {"version", no_argument, 0, 'v'},
-        {0, 0, 0, 0}
-      };
+    // arguments parsing
+    while (1) {
+        static struct option long_options[] = {
+            {"device", required_argument, 0, 'd'},
+            {"get-config", no_argument, 0, 'g'},
+            {"mode", required_argument, 0, 'm'},
+            {"address", required_argument, 0, 'r'},
+            {"autoread", required_argument, 0, 'a'},
+            {"eoi", required_argument, 0, 'e'},
+            {"eot", required_argument, 0, 't'},
+            {"eos", required_argument, 0, 's'},
+            {"signal", required_argument, 0, 'n'},
+            {"help", no_argument, 0, 'h'},
+            {"version", no_argument, 0, 'v'},
+            {0, 0, 0, 0}
+        };
 
-      int option_index = 0;
+        int option_index = 0;
 
-      c = getopt_long (argc, argv, "d:gm:r:a:e:t:s:n:hv", long_options, &option_index);
+        c = getopt_long(argc, argv, "d:gm:r:a:e:t:s:n:hv", long_options, &option_index);
 
-      if (c == -1)
-        {
-          break;
+        if (c == -1) {
+            break;
         }
 
-      switch (c)
-        {
+        switch (c) {
         case 'd':
-          memset (tty, 0, STR_MAXLEN);
-          memcpy (tty, optarg, strlen (optarg));
-          break;
+            strcpy(tty, optarg);
+            break;
 
         case 'g':
-          default_values = 0;
-          get = 1;
-          break;
+            get = 1;
+            break;
 
         case 'm':
-          default_values = 0;
-          if (!strcmp (optarg, "1") || !strcmp (optarg, "0"))
-            p_mode = atoi (optarg);
-          else
-            {
-              printf ("%s: non valid option -- \"%s\"\n", PROGRAM_NAME, optarg);
-              return (EXIT_FAILURE);
+            p_mode = strtol(optarg, &endptr, 10);
+            if (*endptr != '\0') {
+                AD_SAVE_ERROR_INFO(ad);
+                fprintf(stderr, "%s\n\tWhile processing -m|--mode: Non valid option\n", ad.aderror_info);
+                return EXIT_FAILURE;
             }
-          break;
+            break;
 
         case 'r':
-          default_values = 0;
+            pad_temp = strtok(optarg, ",");
+            sad_temp = strtok(NULL, ",");
 
-          pad_temp = strtok (optarg, ",");
-          sad_temp = strtok (NULL, ",");
-          
-          p_padd = strtol (pad_temp, &endptr, 10);
-
-          if (*endptr != '\0')
-            {
-              printf ("%s: non valid option -- \"%s\"\n", PROGRAM_NAME, pad_temp);
-              return (EXIT_FAILURE);
+            p_padd = strtol(pad_temp, &endptr, 10);
+            if (*endptr != '\0') {
+                AD_SAVE_ERROR_INFO(ad);
+                fprintf(stderr, "%s\n\tWhile processing -r|--address: Non valid option\n", ad.aderror_info);
+                return EXIT_FAILURE;
             }
 
-          if (sad_temp != NULL)
-            {
-              p_sadd = strtol (sad_temp, &endptr_s, 10);
-
-              if (*endptr_s != '\0')
-                {
-                  printf ("%s: non valid option -- \"%s\"\n", PROGRAM_NAME, sad_temp);
-                  return (EXIT_FAILURE);
+            if (sad_temp != NULL) {
+                p_sadd = strtol(sad_temp, &endptr_s, 10);
+                if (*endptr_s != '\0') {
+                    AD_SAVE_ERROR_INFO(ad);
+                    fprintf(stderr, "%s\n\tWhile processing -r|--address: Non valid option\n", ad.aderror_info);
+                    return EXIT_FAILURE;
                 }
             }
 
-          break;
+            break;
 
         case 'a':
-          default_values = 0;
-          if (!strcmp (optarg, "1") || !strcmp (optarg, "0"))
-            p_auto = atoi (optarg);
-          else
-            {
-              printf ("%s: non valid option -- \"%s\"\n", PROGRAM_NAME, optarg);
-              return (EXIT_FAILURE);
+            p_auto = strtol(optarg, &endptr, 10);
+            if (*endptr != '\0') {
+                AD_SAVE_ERROR_INFO(ad);
+                fprintf(stderr, "%s\n\tWhile processing -a|--autoread: Non valid option\n", ad.aderror_info);
+                return EXIT_FAILURE;
             }
-          break;
+            break;
 
         case 'e':
-          default_values = 0;
-          if (!strcmp (optarg, "1") || !strcmp (optarg, "0"))
-            p_ceoi = atoi (optarg);
-          else
-            {
-              printf ("%s: non valid option -- \"%s\"\n", PROGRAM_NAME, optarg);
-              return (EXIT_FAILURE);
+            p_ceoi = strtol(optarg, &endptr, 10);
+            if (*endptr != '\0') {
+                AD_SAVE_ERROR_INFO(ad);
+                fprintf(stderr, "%s\n\tWhile processing -e|--eoi: Non valid option\n", ad.aderror_info);
+                return EXIT_FAILURE;
             }
-          break;
+            break;
 
         case 't':
-          default_values = 0;
-          p_ceot = strtol (optarg, &endptr, 10);
-          if (*endptr != '\0')
-            {
-              printf ("%s: non valid option -- \"%s\"\n", PROGRAM_NAME, optarg);
-              return (EXIT_FAILURE);
+            p_ceot = strtol(optarg, &endptr, 10);
+            if (*endptr != '\0') {
+                AD_SAVE_ERROR_INFO(ad);
+                fprintf(stderr, "%s\n\tWhile processing -t|--eot: Non valid option\n", ad.aderror_info);
+                return EXIT_FAILURE;
             }
-          break;
+            break;
 
         case 's':
-          default_values = 0;
-          if (!strcmp (optarg, "3") || !strcmp (optarg, "2") || !strcmp (optarg, "1") || !strcmp (optarg, "0"))
-            p_ceos = atoi (optarg);
-          else
-            {
-              printf ("%s: non valid option -- \"%s\"\n", PROGRAM_NAME, optarg);
-              return (EXIT_FAILURE);
+            p_ceos = strtol(optarg, &endptr, 10);
+            if (*endptr != '\0') {
+                AD_SAVE_ERROR_INFO(ad);
+                fprintf(stderr, "%s\n\tWhile processing -s|--eos: Non valid option\n", ad.aderror_info);
+                return EXIT_FAILURE;
             }
-          break;
+            break;
 
         case 'n':
-          printf ("Sending signal %s\n", optarg);
+            printf("Sending signal %s\n", optarg);
 
-          if (!strcmp (optarg, "IFC"))
-            p_sign = SIG_IFC;
-          else if (!strcmp (optarg, "CLR"))
-            p_sign = SIG_CLR;
-          else if (!strcmp (optarg, "LOC"))
-            p_sign = SIG_LOC;
-          else if (!strcmp (optarg, "SRQ"))
-            p_sign = SIG_SRQ;
-          else if (!strcmp (optarg, "SPOLL"))
-            p_sign = SIG_SPL;
-          else if (!strcmp (optarg, "RST"))
-            p_sign = SIG_RST;
-          else
-            {
-              printf ("%s: non valid option -- \"%s\"\n", PROGRAM_NAME, optarg);
-              return (EXIT_FAILURE);
+            if (!strcmp(optarg, "IFC"))
+                p_sign = SIG_IFC;
+            else if (!strcmp(optarg, "CLR"))
+                p_sign = SIG_CLR;
+            else if (!strcmp(optarg, "LOC"))
+                p_sign = SIG_LOC;
+            else if (!strcmp(optarg, "SRQ"))
+                p_sign = SIG_SRQ;
+            else if (!strcmp(optarg, "SPOLL"))
+                p_sign = SIG_SPL;
+            else if (!strcmp(optarg, "RST"))
+                p_sign = SIG_RST;
+            else {
+                AD_SAVE_ERROR_INFO(ad);
+                fprintf(stderr, "%s\n\tWhile processing -n|--signal: Non valid option\n", ad.aderror_info);
+                return EXIT_FAILURE;
             }
 
-          break;
+            break;
 
         case 'h':
-          puts ("\
+            puts("\
 Usage: hprologix [OPTIONS]...\n\
 Configure the prologix adapter\n");
-          puts ("\
+            puts("\
   -d, --device=STRING       communicate with serial interface defined by STRING;\n\
                             default: '/dev/ttyUSB0'\n\
   -g, --get-config          get current cofiguration\n\
@@ -241,7 +223,7 @@ Configure the prologix adapter\n");
                             other option, except for -d, -h and -v)\n\
   -h, --help                show this help and exit\n\
   -v, --version             show information about program version and exit\n");
-          puts ("\
+            puts("\
 SIG stands for one of the following signals:\n\
   IFC                       send the IFC signal\n\
   CLR                       send the SDC (Selected Device Clear) to the current\n\
@@ -253,148 +235,309 @@ SIG stands for one of the following signals:\n\
   SPOLL                     perform a serial poll of the instrument at the\n\
                             specified address\n\
   RST                       perform a controller reset (it takes about 5 secs)\n");
-          help ();
-          return (EXIT_SUCCESS);
-          break;
+            help();
+            return EXIT_SUCCESS;
+            break;
 
         case 'v':
-          version (PROGRAM_NAME);
-          return (EXIT_SUCCESS);
-          break;
+            version(PROGRAM_NAME);
+            return EXIT_SUCCESS;
+            break;
 
         case '?':
-          puts ("\
+            puts("\
 Usage: hprologix [OPTIONS]... [COMMAND]\n\
 Configure the prologix adapter\n");
-          return (EXIT_FAILURE);
+            return EXIT_FAILURE;
 
         default:
-          abort ();
+            abort();
         }
     }
 
-  // check whether the serial port is available and configure it
-  if (!HPIB_serial_config (tty, 5))
-    {
-      HPIB_serial_close ();
-      return (EXIT_FAILURE);
+    strcpy(config_file, DATA_PATH);
+    strcat(config_file, "prologix.conf.xml");
+
+    if (!ad_config(&ad, config_file, tty, 20)) {
+        AD_SAVE_ERROR_INFO(ad);
+        paderror(ad.aderror, "While configuring the adapter", ad.aderror_info);
+        ad_close(&ad);
+        return EXIT_FAILURE;
     }
 
-  if (p_sign != PROLOGIX_NONE)
-    {
-      int val = 0;
-      
-      switch (p_sign)
-        {
+    if (ad_ver(&ad) == ad_get_curr_errcode(&ad)) {
+        AD_SAVE_ERROR_INFO(ad);
+        paderror(ad.aderror, "While checking the adapter", ad.aderror_info);
+        ad_close(&ad);
+        return EXIT_FAILURE;
+    }
+
+    if (strcmp(PROLOGIX_VERSION_STR, ad.__ad_temp_vars.__answer) != 0) {
+        AD_SAVE_ERROR_INFO(ad);
+        fprintf(stderr, "%s\n\tWarning - Adapter version line doesn't match\n", ad.aderror_info);
+        fprintf(stderr, "%s\n", ad.__ad_temp_vars.__answer);
+    }
+
+    if (p_sign != -1) {
+        int val = 0;
+        int srq;
+
+        switch (p_sign) {
         case SIG_IFC:
-          ad_ifc ();
-          break;
+            if (ad_ifc(&ad) == ad_get_curr_errcode(&ad)) {
+                AD_SAVE_ERROR_INFO(ad);
+                paderror(ad.aderror, "While sending IFC signal", ad.aderror_info);
+                ad_close(&ad);
+                return EXIT_FAILURE;
+            }
+            break;
 
         case SIG_CLR:
-          ad_clr ();
-          break;
+            if (ad_clr(&ad) == ad_get_curr_errcode(&ad)) {
+                AD_SAVE_ERROR_INFO(ad);
+                paderror(ad.aderror, "While sending CLR signal", ad.aderror_info);
+                ad_close(&ad);
+                return EXIT_FAILURE;
+            }
+            break;
 
         case SIG_LOC:
-          ad_loc ();
-          break;
+            if (ad_loc(&ad) == ad_get_curr_errcode(&ad)) {
+                AD_SAVE_ERROR_INFO(ad);
+                paderror(ad.aderror, "While sending LOC signal", ad.aderror_info);
+                ad_close(&ad);
+                return EXIT_FAILURE;
+            }
+            break;
 
         case SIG_SRQ:
-          printf ("Signal returned: %d\n", ad_srq ());
-          break;
+            srq = ad_srq(&ad);
+            if (srq != ad_get_curr_errcode(&ad))
+                printf("Signal returned: %d\n", ad_srq(&ad));
+            else {
+                AD_SAVE_ERROR_INFO(ad);
+                paderror(ad.aderror, "While sending SRQ signal", ad.aderror_info);
+                ad_close(&ad);
+                return EXIT_FAILURE;
+            }
+
+            break;
 
         case SIG_SPL:
-          val = ad_spoll (PROLOGIX_NONE, PROLOGIX_NONE);
-          printf ("Signal returned: ");
-          if (val != PROLOGIX_NONE)
-            printf ("%d\n", val);
-          else 
-            printf ("no answer\n");
-          break;
+            // TODO: check this
+            val = ad_spoll(&ad);
+            printf("Signal returned: ");
+            if (val != ad_get_curr_errcode(&ad))
+                printf("%d\n", val);
+            else
+                printf("no answer\n");
+            break;
 
         case SIG_RST:
-          ad_rst ();
-          break;
+            if (ad_rst(&ad) == ad_get_curr_errcode(&ad)) {
+                AD_SAVE_ERROR_INFO(ad);
+                paderror(ad.aderror, "While sending RST signal", ad.aderror_info);
+                ad_close(&ad);
+                return EXIT_FAILURE;
+            }
+            break;
         }
-      return (EXIT_SUCCESS);
+        return EXIT_SUCCESS;
     }
 
-  if (default_values)
-    puts ("Configuring the Prologix adapter with default values");
 
-  if (get)
-    {
-      int sad;
+    if (get) {
+        int mod;
+        int pad;
+        int sad;
+        int eos;
+        int eoi;
+        int eot_e;
 
-      printf ("Mode: %s\n", (ad_get_mode () ? "Controller" : "Device"));
-      printf ("Address: %d (PAD)", ad_get_address (&sad));
-      if (sad != NULL)
-        printf (" %d (SAD)\n", sad);
-      else
-        printf ("\n");
+        mod = ad_get_mode(&ad);
 
-      printf ("EOI: %s\n", (ad_get_eoi () ? "Enabled" : "Disabled"));
-      if (ad_get_eot_enable ())
-        {
-          char c = ad_get_eot_char ();
-          printf ("EOT: Character %d ('%c')\n", c, c);
+        if (mod != ad_get_curr_errcode(&ad))
+            printf("Mode: %s\n", (mod == ad_get_const(&ad, "MD_CONTROLLER") ? "Controller" : "Device"));
+        else {
+            AD_SAVE_ERROR_INFO(ad);
+            paderror(ad.aderror, "While executing ad_get_mode", ad.aderror_info);
+            ad_close(&ad);
+            return EXIT_FAILURE;
         }
-      else
-        {
-          printf ("EOT: Disabled\n");
+
+        pad = ad_get_address(&ad);
+
+        if (pad != ad_get_curr_errcode(&ad))
+            printf("Address: %d (PAD)", pad);
+        else {
+            AD_SAVE_ERROR_INFO(ad);
+            paderror(ad.aderror, "While executing ad_get_address", ad.aderror_info);
+            ad_close(&ad);
+            return EXIT_FAILURE;
         }
-      printf ("EOS: ");
-      switch (ad_get_eos ())
-        {
-        case EO_CRLF:
-          printf ("CR+LF\n");
-          break;
-        case EO_CR:
-          printf ("CR\n");
-          break;
-        case EO_LF:
-          printf ("LF\n");
-          break;
-        case EO_NONE:
-          printf ("NONE\n");
-          break;
+
+        sad = ad_get_next_answer(&ad);
+
+        if (sad != ad_get_curr_errcode(&ad))
+            printf(" %d (SAD)\n", sad);
+        else
+            printf("\n");
+
+        eoi = ad_get_eoi(&ad);
+
+        if (eoi != ad_get_curr_errcode(&ad))
+            printf("EOI: %s\n", (eoi == ad_get_const(&ad, "ENABLED") ? "Enabled" : "Disabled"));
+        else {
+            AD_SAVE_ERROR_INFO(ad);
+            paderror(ad.aderror, "While executing ad_get_eoi", ad.aderror_info);
+            ad_close(&ad);
+            return EXIT_FAILURE;
         }
+
+        eot_e = ad_get_eot_enable(&ad);
+
+        if (eot_e != ad_get_curr_errcode(&ad)) {
+            if (eot_e == ad_get_const(&ad, "ENABLED")) {
+                char c = ad_get_eot_char(&ad);
+                if (c != ad_get_curr_errcode(&ad))
+                    printf("EOT: Character %d ('%c')\n", c, c);
+                else {
+                    AD_SAVE_ERROR_INFO(ad);
+                    paderror(ad.aderror, "While executing ad_get_eot_char", ad.aderror_info);
+                    ad_close(&ad);
+                    return EXIT_FAILURE;
+                }
+            } else {
+                printf("EOT: Disabled\n");
+            }
+        } else {
+            AD_SAVE_ERROR_INFO(ad);
+            paderror(ad.aderror, "While executing ad_get_eot_enable", ad.aderror_info);
+            ad_close(&ad);
+            return EXIT_FAILURE;
+        }
+
+        printf("EOS: ");
+
+        eos = ad_get_eos(&ad);
+
+        if (eos == ad_get_const(&ad, "EO_CRLF")) {
+            printf("CR+LF");
+        } else if (eos == ad_get_const(&ad, "EO_CR")) {
+            printf("CR");
+        } else if (eos == ad_get_const(&ad, "EO_LF")) {
+            printf("LF");
+        } else if (eos == ad_get_const(&ad, "EO_NONE")) {
+            printf("NONE");
+        } else if (eos == ad_get_curr_errcode(&ad)) {
+            AD_SAVE_ERROR_INFO(ad);
+            paderror(ad.aderror, "While executing ad_get_eos", ad.aderror_info);
+            ad_close(&ad);
+            return EXIT_FAILURE;
+        }
+
+        printf("\n");
+    } else {
+        int defvals = 0;
+
+        if (p_mode == -1 && p_padd == -1 && p_sadd == -1 && p_auto == -1 && p_ceoi == -1 && p_ceot == -1 && p_ceos == -1 && p_sign == -1) {
+            puts("Configuring the Prologix adapter with default values");
+            defvals = 1;
+        }
+
+        if (defvals || p_mode != -1)
+            if (ad_set_mode(&ad, p_mode != -1 ? p_mode : ad_get_const(&ad, PROLOGIX_D_MODE)) == ad_get_curr_errcode(&ad)) {
+                AD_SAVE_ERROR_INFO(ad);
+                paderror(ad.aderror, "While executing ad_set_mode", ad.aderror_info);
+                ad_close(&ad);
+                return EXIT_FAILURE;
+            }
+
+        if (defvals || p_padd != -1)
+            if (PROLOGIX_D_SADD != -1 || p_sadd != -1) {
+                if (ad_set_address(&ad, p_padd != -1 ? p_padd : PROLOGIX_D_ADDR, p_sadd != -1 ? p_sadd : PROLOGIX_D_SADD) == ad_get_curr_errcode(&ad)) {
+                    AD_SAVE_ERROR_INFO(ad);
+                    paderror(ad.aderror, "While executing ad_set_address", ad.aderror_info);
+                    ad_close(&ad);
+                    return EXIT_FAILURE;
+                }
+            } else {
+                if (ad_set_address(&ad, p_padd != -1 ? p_padd : PROLOGIX_D_ADDR) == ad_get_curr_errcode(&ad)) {
+                    AD_SAVE_ERROR_INFO(ad);
+                    paderror(ad.aderror, "While executing ad_set_address", ad.aderror_info);
+                    ad_close(&ad);
+                    return EXIT_FAILURE;
+                }
+            }
+
+        if (defvals || p_auto != -1)
+            if (ad_get_mode(&ad) == ad_get_const(&ad, "MD_CONTROLLER")) {
+                if (ad_set_auto(&ad, p_auto != -1 ? p_auto : ad_get_const(&ad, PROLOGIX_D_AUTO)) == ad_get_curr_errcode(&ad)) {
+                    AD_SAVE_ERROR_INFO(ad);
+                    paderror(ad.aderror, "While executing ad_set_auto", ad.aderror_info);
+                    ad_close(&ad);
+                    return EXIT_FAILURE;
+                }
+            } else {
+                AD_SAVE_ERROR_INFO(ad);
+                fprintf(stderr, "%s\n\tWhile executing ad_set_auto: Wrong adapter mode\n", ad.aderror_info);
+                ad_close(&ad);
+                return EXIT_FAILURE;
+            }
+
+        if (defvals || p_ceoi != -1)
+            if (ad_set_eoi(&ad, p_ceoi != -1 ? p_ceoi : ad_get_const(&ad, PROLOGIX_D_CEOI)) == ad_get_curr_errcode(&ad)) {
+                AD_SAVE_ERROR_INFO(ad);
+                paderror(ad.aderror, "While executing ad_set_eoi", ad.aderror_info);
+                ad_close(&ad);
+                return EXIT_FAILURE;
+            }
+
+        if (defvals || p_ceot != -1) {
+            if (p_ceot != -1) {
+                if (ad_set_eot_enable(&ad, ad_get_const(&ad, "ENABLED")) == ad_get_curr_errcode(&ad)) {
+                    AD_SAVE_ERROR_INFO(ad);
+                    paderror(ad.aderror, "While executing ad_set_eot_enable", ad.aderror_info);
+                    ad_close(&ad);
+                    return EXIT_FAILURE;
+                }
+
+                if (ad_set_eot_char(&ad, p_ceot) == ad_get_curr_errcode(&ad)) {
+                    AD_SAVE_ERROR_INFO(ad);
+                    paderror(ad.aderror, "While executing ad_set_eot_char", ad.aderror_info);
+                    ad_close(&ad);
+                    return EXIT_FAILURE;
+                }
+            } else {
+                if (ad_set_eot_enable(&ad, ad_get_const(&ad, PROLOGIX_D_CEOT)) == ad_get_curr_errcode(&ad)) {
+                    AD_SAVE_ERROR_INFO(ad);
+                    paderror(ad.aderror, "While executing ad_set_eot_enable", ad.aderror_info);
+                    ad_close(&ad);
+                    return EXIT_FAILURE;
+                }
+                if (ad_get_const(&ad, PROLOGIX_D_CEOT) == ad_get_const(&ad, "ENABLED"))
+                    if (p_ceot == ad_get_const(&ad, "ENABLED"))
+                        if (ad_set_eot_char(&ad, PROLOGIX_D_EOTC) == ad_get_curr_errcode(&ad)) {
+                            AD_SAVE_ERROR_INFO(ad);
+                            paderror(ad.aderror, "While executing ad_set_eot_char", ad.aderror_info);
+                            ad_close(&ad);
+                            return EXIT_FAILURE;
+                        }
+            }
+        }
+
+        if (defvals || p_ceos != -1)
+            if (ad_set_eos(&ad, p_ceos != -1 ? p_ceos : ad_get_const(&ad, PROLOGIX_D_CEOS)) == ad_get_curr_errcode(&ad)) {
+                AD_SAVE_ERROR_INFO(ad);
+                paderror(ad.aderror, "While executing ad_set_eos", ad.aderror_info);
+                ad_close(&ad);
+                return EXIT_FAILURE;
+            }
     }
-  else
-    {
-      if (!ad_set_mode (p_mode))
-        return (EXIT_FAILURE);
 
-      if (!ad_set_address (p_padd, p_sadd))
-        return (EXIT_FAILURE);
+    // close the device
+    ad_close(&ad);
 
-      if (p_mode != 0)
-        if (!ad_set_auto (p_auto))
-          return (EXIT_FAILURE);
-
-      if (!ad_set_eoi (p_ceoi))
-        return (EXIT_FAILURE);
-
-      if (p_ceot != -1)
-        {
-          if (!ad_set_eot_enable (TRUE))
-            return (EXIT_FAILURE);
-
-          if (!ad_set_eot_char (p_ceot))
-            return (EXIT_FAILURE);
-        }
-      else
-        {
-          if (!ad_set_eot_enable (FALSE))
-            return (EXIT_FAILURE);
-        }
-
-      if (!ad_set_eos (p_ceos))
-        return (EXIT_FAILURE);
-    }
-
-  // close the devicse
-  HPIB_serial_close ();
-
-  // end
-  return (EXIT_SUCCESS);
+    // end
+    return EXIT_SUCCESS;
 }
