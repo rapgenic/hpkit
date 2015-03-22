@@ -17,11 +17,15 @@
     along with HPKit.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "config.h"
+
+#include <stdio.h>
+#include <dirent.h>
+
+#include "adapters.h"
 #include "common.h"
 
-int
-version(char *progname)
-{
+int version(char *progname) {
     printf("%s (%s) %s\n", progname, PACKAGE_NAME, VERSION);
     puts("\
 Copyright © 2015 Giulio Girardi.\n\
@@ -32,12 +36,50 @@ There is NO WARRANTY, to the extent permitted by law.\n");
     return 1;
 }
 
-int
-help()
-{
+int help() {
     printf("\
 Report bugs to: %s\n\
 Package home page: <%s>\n", PACKAGE_BUGREPORT, PACKAGE_URL);
+
+    return 1;
+}
+
+int adapters_list() {
+    DIR *d;
+    struct dirent *dir;
+    d = opendir(DATA_PATH);
+
+    puts("ADAPTER stands for the adapter you are using. Available adapters are:");
+
+    if (d) {
+        while ((dir = readdir(d)) != NULL) {
+            if (strcmp(dir->d_name, ".") && strcmp(dir->d_name, "..") && dir->d_type == DT_REG) {
+                // Get the extension
+                char d[10];
+                int i;
+                memset(d, 0, 10);
+                
+                for (i = 0; i < 10; i++) {
+                    d[i] = dir->d_name[strlen(dir->d_name) - 9 + i];
+                }
+                
+                // Check the extension
+                if (!strcmp(d, ".conf.xml")) {
+                    char *c = dir->d_name;
+                    c[strlen(c) - 9] = 0;
+                    printf("  %s\n", dir->d_name);
+                }
+            }
+        }
+        closedir(d);
+    } else {
+        perror("While opening DATA_PATH");
+        return 0;
+    }
+
+    puts("\nMore adapters may be added in the future\n");
+    printf("Adapters config files are in:\n\
+%s\n\n", DATA_PATH);
 
     return 1;
 }

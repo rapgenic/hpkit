@@ -24,39 +24,38 @@
 
 #include "aderror.h"
 
-int paderror(ad_error_t aderror, char *str, ad_error_info_t aderror_info)
-{
+int paderror(ad_error_t aderror, char *str, ad_error_info_t aderror_info) {
     char msg[STR_MAXLEN];
 
     switch (aderror) {
-    case AD_SUCCESS:
-        return 0;
-    case AD_ERR_IO:
-        strcpy(msg, S_AD_ERR_IO);
-        break;
-    case AD_ERR_FILE_IO:
-        strcpy(msg, S_AD_ERR_FILE_IO);
-        break;
-    case AD_ERR_SYNTAX:
-        strcpy(msg, S_AD_ERR_SYNTAX);
-        break;
-    case AD_ERR_REGEX:
-        strcpy(msg, S_AD_ERR_REGEX);
-        break;
-    case AD_ERR_RANGE:
-        strcpy(msg, S_AD_ERR_RANGE);
-        break;
-    case AD_ERR_BUF_EXC:
-        strcpy(msg, S_AD_ERR_BUF_EXC);
-        break;
-    case AD_ERR_NO_FUNCTION:
-        strcpy(msg, S_AD_ERR_NO_FUNCTION);
-        break;
-    case AD_UNKNOWN:
-        strcpy(msg, S_AD_UNKNOWN);
-        break;
-    default:
-        return 0;
+        case AD_SUCCESS:
+            return 0;
+        case AD_ERR_IO:
+            strcpy(msg, S_AD_ERR_IO);
+            break;
+        case AD_ERR_FILE_IO:
+            strcpy(msg, S_AD_ERR_FILE_IO);
+            break;
+        case AD_ERR_SYNTAX:
+            strcpy(msg, S_AD_ERR_SYNTAX);
+            break;
+        case AD_ERR_REGEX:
+            strcpy(msg, S_AD_ERR_REGEX);
+            break;
+        case AD_ERR_RANGE:
+            strcpy(msg, S_AD_ERR_RANGE);
+            break;
+        case AD_ERR_BUF_EXC:
+            strcpy(msg, S_AD_ERR_BUF_EXC);
+            break;
+        case AD_ERR_NO_FUNCTION:
+            strcpy(msg, S_AD_ERR_NO_FUNCTION);
+            break;
+        case AD_UNKNOWN:
+            strcpy(msg, S_AD_UNKNOWN);
+            break;
+        default:
+            return 0;
     }
 
     if (aderror_info != NULL) {

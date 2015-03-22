@@ -36,11 +36,6 @@
 extern "C" {
 #endif
 
-    /*    typedef enum {
-            AD_SERIAL_SUCCESS = 0,
-            AD_SERIAL_ERR_IO,       
-        } ad_serial_error_t;*/
-
     typedef struct {
         int f_serial;
         ad_error_t aderror;

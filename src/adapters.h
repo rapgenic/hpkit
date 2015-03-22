@@ -34,27 +34,22 @@
 #ifndef ADAPTERS_H
 #define	ADAPTERS_H
 
-/*#define FILE_BUFFER 10000
-
-#define SET 1
-#define GET 0
-*/
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
 #define _AD_SAVE_ERROR_INFO sprintf(ad->aderror_info, "In %s: function %s (near line %d)", __FILE__, __func__, __LINE__)
-    
+
 #define AD_SAVE_ERROR_INFO(x) sprintf(x.aderror_info, "In %s: function %s (near line %d)", __FILE__, __func__, __LINE__)
 
 #define _NOT(x, y) if(x == ad_get_curr_errcode(&)) return 0; else return x; 
-    
+
     typedef struct {
         char __answer[BUF_MAXLEN];
         char *__answer_strtok_t;
         char __answer_separator;
         int __curr_err_ret_val;
-    } __ad_temp_vars_t;
+    } __ad_temp_vars_t; /* Adapter temp data: you shouldn't use that */
 
     typedef struct {
         char prefix[STR_MAXLEN];
@@ -77,7 +72,7 @@ extern "C" {
     static int _ad_command_read_answer(adapter_t *ad, char *command_name, char *_answer);
 
     int ad_config(adapter_t *ad, char *filename, char *tty, int timeout);
-    int __ad_command(adapter_t *ad, char *command_name, size_t count, int values[]) __attribute__ ((warn_unused_result));
+    int __ad_command(adapter_t *ad, char *command_name, size_t count, int values[]) __attribute__((warn_unused_result));
     int ad_get_next_answer(adapter_t *ad);
     inline int ad_get_curr_errcode(adapter_t *ad);
     int ad_get_const(adapter_t *ad, char *const_name);

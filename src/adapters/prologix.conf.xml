@@ -266,6 +266,7 @@
         </getmode>
         
         <!-- MORE -->
+        
         <ver cmd="ver" mode="both">
             <params></params>
             <answer>

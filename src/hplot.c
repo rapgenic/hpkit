@@ -29,8 +29,7 @@
 #define PROGRAM_NAME "hplot"
 
 int
-_ad_plot_proto_response_required(char *buf)
-{
+_ad_plot_proto_response_required(char *buf) {
     int x = strlen(buf) - 1;
 
     if (buf[x] == '\n' && buf[x - 1] == '\r' && buf[x - 2] != ';') {
@@ -41,8 +40,7 @@ _ad_plot_proto_response_required(char *buf)
 }
 
 void
-_ad_plot_proto_get_command(char *buf, char cmd[2])
-{
+_ad_plot_proto_get_command(char *buf, char cmd[2]) {
     int x = strlen(buf) - 1;
 
     cmd[0] = buf[x - 3];
@@ -50,8 +48,7 @@ _ad_plot_proto_get_command(char *buf, char cmd[2])
 }
 
 int
-main(int argc, char **argv)
-{
+main(int argc, char **argv) {
     // temp vars
     char buf[BUF_MAXLEN];
     int c, d;
@@ -95,67 +92,67 @@ main(int argc, char **argv)
             break;
 
         switch (c) {
-        case 'd':
-            strcpy(tty, optarg);
-            break;
+            case 'd':
+                strcpy(tty, optarg);
+                break;
 
-        case 'a':
-            if (optarg != "")
-                strcpy(config_file, optarg);
-            break;
+            case 'a':
+                if (optarg != "")
+                    strcpy(config_file, optarg);
+                break;
 
-        case 'r':
-            pad_temp = strtok(optarg, ",");
-            sad_temp = strtok(NULL, ",");
+            case 'r':
+                pad_temp = strtok(optarg, ",");
+                sad_temp = strtok(NULL, ",");
 
-            ad_address = strtol(pad_temp, &endptr, 10);
-            if (*endptr != '\0') {
-                AD_SAVE_ERROR_INFO(ad);
-                fprintf(stderr, "%s\n\tWhile processing -r|--address: Non valid option\n", ad.aderror_info);
-                return EXIT_FAILURE;
-            }
-
-            if (sad_temp != NULL) {
-                ad_saddress = strtol(sad_temp, &endptr_s, 10);
-                if (*endptr_s != '\0') {
+                ad_address = strtol(pad_temp, &endptr, 10);
+                if (*endptr != '\0') {
                     AD_SAVE_ERROR_INFO(ad);
                     fprintf(stderr, "%s\n\tWhile processing -r|--address: Non valid option\n", ad.aderror_info);
                     return EXIT_FAILURE;
                 }
-            }
-            break;
 
-        case 'o':
-            strcpy(output_path, optarg);
-            using_output_file = 1;
-            break;
+                if (sad_temp != NULL) {
+                    ad_saddress = strtol(sad_temp, &endptr_s, 10);
+                    if (*endptr_s != '\0') {
+                        AD_SAVE_ERROR_INFO(ad);
+                        fprintf(stderr, "%s\n\tWhile processing -r|--address: Non valid option\n", ad.aderror_info);
+                        return EXIT_FAILURE;
+                    }
+                }
+                break;
 
-        case 't':
-            d = strtol(optarg, &endptr, 10);
-            if (*endptr != '\0') {
-                AD_SAVE_ERROR_INFO(ad);
-                fprintf(stderr, "%s\n\tWhile processing -t|--timeout: Non valid option\n", ad.aderror_info);
-                return EXIT_FAILURE;
-            }
+            case 'o':
+                strcpy(output_path, optarg);
+                using_output_file = 1;
+                break;
 
-            if (d < 100) {
-                AD_SAVE_ERROR_INFO(ad);
-                fprintf(stderr, "%s\n\tWhile processing -t|--timeout: Non valid option\n", ad.aderror_info);
-                return EXIT_FAILURE;
-            }
+            case 't':
+                d = strtol(optarg, &endptr, 10);
+                if (*endptr != '\0') {
+                    AD_SAVE_ERROR_INFO(ad);
+                    fprintf(stderr, "%s\n\tWhile processing -t|--timeout: Non valid option\n", ad.aderror_info);
+                    return EXIT_FAILURE;
+                }
 
-            timeout = d / 100;
-            break;
+                if (d < 100) {
+                    AD_SAVE_ERROR_INFO(ad);
+                    fprintf(stderr, "%s\n\tWhile processing -t|--timeout: Non valid option\n", ad.aderror_info);
+                    return EXIT_FAILURE;
+                }
 
-        case 'c':
-            config_adapter = 0;
-            break;
+                timeout = d / 100;
+                break;
 
-        case 'h':
-            puts("\
+            case 'c':
+                config_adapter = 0;
+                break;
+
+            case 'h':
+                puts("\
 Usage: hplot [OPTIONS]...\n\
 Dump or save plot data sent by HP instrument's GPIB interface\n");
-            puts("\
+                puts("\
   -d, --device=STRING       communicate with serial interface defined by STRING;\n\
                             default: '/dev/ttyUSB0'\n\
   -a, --adapter=ADAPTER     set the adapter used to communicate with the\n\
@@ -170,29 +167,24 @@ Dump or save plot data sent by HP instrument's GPIB interface\n");
                             the -r|--address option)\n\
   -h, --help                show this help and exit\n\
   -v, --version             show information about program version and exit\n");
-            puts("\
-ADAPTER stands for the adapter you are using. Supported adapters are:\n\
-  prologix                  the Prologix adapter, fully supported\n\
-  none                      don't configure the adapter (it will also disable\n\
-                            the -r|--address option)\n\
-\nMore adapters may be added in the future\n");
-            help();
-            return (EXIT_SUCCESS);
-            break;
+                adapters_list();
+                help();
+                return (EXIT_SUCCESS);
+                break;
 
-        case 'v':
-            version(PROGRAM_NAME);
-            return (EXIT_SUCCESS);
-            break;
+            case 'v':
+                version(PROGRAM_NAME);
+                return (EXIT_SUCCESS);
+                break;
 
-        case '?':
-            puts("\n\
+            case '?':
+                puts("\n\
 Usage: hplot [OPTIONS]...\n\
 Dump or save plot data sent by HP instrument's GPIB interface");
-            return (EXIT_FAILURE);
+                return (EXIT_FAILURE);
 
-        default:
-            abort();
+            default:
+                abort();
         }
     }
 

@@ -1,7 +1,13 @@
 Here are the names of the programs in this package,
 each followed by the name(s) of its author(s).
 
+** Main Programs **
+
 hplot: Giulio Girardi
 hplisten: Giulio Girardi
 hptalk: Giulio Girardi
 hprologix: Giulio Girardi
+
+** Adapters Configuration Files **
+
+prologix.conf.xml: Giulio Girardi

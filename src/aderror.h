@@ -20,6 +20,7 @@
 #include "config.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #ifndef ADERROR_H
 #define	ADERROR_H

@@ -20,6 +20,9 @@
 #include "config.h"
 
 #include <stdio.h>
+#include <dirent.h>
+
+#include "adapters.h"
 
 #ifndef COMMON_H
 #define	COMMON_H
@@ -30,6 +33,7 @@ extern "C" {
 
     int version(char *progname);
     int help();
+    int adapters_list();
 
 #ifdef	__cplusplus
 }

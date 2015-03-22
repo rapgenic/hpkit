@@ -49,8 +49,7 @@ typedef enum {
 } prologix_signal_t;
 
 int
-main(int argc, char **argv)
-{
+main(int argc, char **argv) {
     // temp vars
     int c;
     char *endptr, *endptr_s;
@@ -100,109 +99,109 @@ main(int argc, char **argv)
         }
 
         switch (c) {
-        case 'd':
-            strcpy(tty, optarg);
-            break;
+            case 'd':
+                strcpy(tty, optarg);
+                break;
 
-        case 'g':
-            get = 1;
-            break;
+            case 'g':
+                get = 1;
+                break;
 
-        case 'm':
-            p_mode = strtol(optarg, &endptr, 10);
-            if (*endptr != '\0') {
-                AD_SAVE_ERROR_INFO(ad);
-                fprintf(stderr, "%s\n\tWhile processing -m|--mode: Non valid option\n", ad.aderror_info);
-                return EXIT_FAILURE;
-            }
-            break;
+            case 'm':
+                p_mode = strtol(optarg, &endptr, 10);
+                if (*endptr != '\0') {
+                    AD_SAVE_ERROR_INFO(ad);
+                    fprintf(stderr, "%s\n\tWhile processing -m|--mode: Non valid option\n", ad.aderror_info);
+                    return EXIT_FAILURE;
+                }
+                break;
 
-        case 'r':
-            pad_temp = strtok(optarg, ",");
-            sad_temp = strtok(NULL, ",");
+            case 'r':
+                pad_temp = strtok(optarg, ",");
+                sad_temp = strtok(NULL, ",");
 
-            p_padd = strtol(pad_temp, &endptr, 10);
-            if (*endptr != '\0') {
-                AD_SAVE_ERROR_INFO(ad);
-                fprintf(stderr, "%s\n\tWhile processing -r|--address: Non valid option\n", ad.aderror_info);
-                return EXIT_FAILURE;
-            }
-
-            if (sad_temp != NULL) {
-                p_sadd = strtol(sad_temp, &endptr_s, 10);
-                if (*endptr_s != '\0') {
+                p_padd = strtol(pad_temp, &endptr, 10);
+                if (*endptr != '\0') {
                     AD_SAVE_ERROR_INFO(ad);
                     fprintf(stderr, "%s\n\tWhile processing -r|--address: Non valid option\n", ad.aderror_info);
                     return EXIT_FAILURE;
                 }
-            }
 
-            break;
+                if (sad_temp != NULL) {
+                    p_sadd = strtol(sad_temp, &endptr_s, 10);
+                    if (*endptr_s != '\0') {
+                        AD_SAVE_ERROR_INFO(ad);
+                        fprintf(stderr, "%s\n\tWhile processing -r|--address: Non valid option\n", ad.aderror_info);
+                        return EXIT_FAILURE;
+                    }
+                }
 
-        case 'a':
-            p_auto = strtol(optarg, &endptr, 10);
-            if (*endptr != '\0') {
-                AD_SAVE_ERROR_INFO(ad);
-                fprintf(stderr, "%s\n\tWhile processing -a|--autoread: Non valid option\n", ad.aderror_info);
-                return EXIT_FAILURE;
-            }
-            break;
+                break;
 
-        case 'e':
-            p_ceoi = strtol(optarg, &endptr, 10);
-            if (*endptr != '\0') {
-                AD_SAVE_ERROR_INFO(ad);
-                fprintf(stderr, "%s\n\tWhile processing -e|--eoi: Non valid option\n", ad.aderror_info);
-                return EXIT_FAILURE;
-            }
-            break;
+            case 'a':
+                p_auto = strtol(optarg, &endptr, 10);
+                if (*endptr != '\0') {
+                    AD_SAVE_ERROR_INFO(ad);
+                    fprintf(stderr, "%s\n\tWhile processing -a|--autoread: Non valid option\n", ad.aderror_info);
+                    return EXIT_FAILURE;
+                }
+                break;
 
-        case 't':
-            p_ceot = strtol(optarg, &endptr, 10);
-            if (*endptr != '\0') {
-                AD_SAVE_ERROR_INFO(ad);
-                fprintf(stderr, "%s\n\tWhile processing -t|--eot: Non valid option\n", ad.aderror_info);
-                return EXIT_FAILURE;
-            }
-            break;
+            case 'e':
+                p_ceoi = strtol(optarg, &endptr, 10);
+                if (*endptr != '\0') {
+                    AD_SAVE_ERROR_INFO(ad);
+                    fprintf(stderr, "%s\n\tWhile processing -e|--eoi: Non valid option\n", ad.aderror_info);
+                    return EXIT_FAILURE;
+                }
+                break;
 
-        case 's':
-            p_ceos = strtol(optarg, &endptr, 10);
-            if (*endptr != '\0') {
-                AD_SAVE_ERROR_INFO(ad);
-                fprintf(stderr, "%s\n\tWhile processing -s|--eos: Non valid option\n", ad.aderror_info);
-                return EXIT_FAILURE;
-            }
-            break;
+            case 't':
+                p_ceot = strtol(optarg, &endptr, 10);
+                if (*endptr != '\0') {
+                    AD_SAVE_ERROR_INFO(ad);
+                    fprintf(stderr, "%s\n\tWhile processing -t|--eot: Non valid option\n", ad.aderror_info);
+                    return EXIT_FAILURE;
+                }
+                break;
 
-        case 'n':
-            printf("Sending signal %s\n", optarg);
+            case 's':
+                p_ceos = strtol(optarg, &endptr, 10);
+                if (*endptr != '\0') {
+                    AD_SAVE_ERROR_INFO(ad);
+                    fprintf(stderr, "%s\n\tWhile processing -s|--eos: Non valid option\n", ad.aderror_info);
+                    return EXIT_FAILURE;
+                }
+                break;
 
-            if (!strcmp(optarg, "IFC"))
-                p_sign = SIG_IFC;
-            else if (!strcmp(optarg, "CLR"))
-                p_sign = SIG_CLR;
-            else if (!strcmp(optarg, "LOC"))
-                p_sign = SIG_LOC;
-            else if (!strcmp(optarg, "SRQ"))
-                p_sign = SIG_SRQ;
-            else if (!strcmp(optarg, "SPOLL"))
-                p_sign = SIG_SPL;
-            else if (!strcmp(optarg, "RST"))
-                p_sign = SIG_RST;
-            else {
-                AD_SAVE_ERROR_INFO(ad);
-                fprintf(stderr, "%s\n\tWhile processing -n|--signal: Non valid option\n", ad.aderror_info);
-                return EXIT_FAILURE;
-            }
+            case 'n':
+                printf("Sending signal %s\n", optarg);
 
-            break;
+                if (!strcmp(optarg, "IFC"))
+                    p_sign = SIG_IFC;
+                else if (!strcmp(optarg, "CLR"))
+                    p_sign = SIG_CLR;
+                else if (!strcmp(optarg, "LOC"))
+                    p_sign = SIG_LOC;
+                else if (!strcmp(optarg, "SRQ"))
+                    p_sign = SIG_SRQ;
+                else if (!strcmp(optarg, "SPOLL"))
+                    p_sign = SIG_SPL;
+                else if (!strcmp(optarg, "RST"))
+                    p_sign = SIG_RST;
+                else {
+                    AD_SAVE_ERROR_INFO(ad);
+                    fprintf(stderr, "%s\n\tWhile processing -n|--signal: Non valid option\n", ad.aderror_info);
+                    return EXIT_FAILURE;
+                }
 
-        case 'h':
-            puts("\
+                break;
+
+            case 'h':
+                puts("\
 Usage: hprologix [OPTIONS]...\n\
 Configure the prologix adapter\n");
-            puts("\
+                puts("\
   -d, --device=STRING       communicate with serial interface defined by STRING;\n\
                             default: '/dev/ttyUSB0'\n\
   -g, --get-config          get current cofiguration\n\
@@ -223,7 +222,7 @@ Configure the prologix adapter\n");
                             other option, except for -d, -h and -v)\n\
   -h, --help                show this help and exit\n\
   -v, --version             show information about program version and exit\n");
-            puts("\
+                puts("\
 SIG stands for one of the following signals:\n\
   IFC                       send the IFC signal\n\
   CLR                       send the SDC (Selected Device Clear) to the current\n\
@@ -235,23 +234,23 @@ SIG stands for one of the following signals:\n\
   SPOLL                     perform a serial poll of the instrument at the\n\
                             specified address\n\
   RST                       perform a controller reset (it takes about 5 secs)\n");
-            help();
-            return EXIT_SUCCESS;
-            break;
+                help();
+                return EXIT_SUCCESS;
+                break;
 
-        case 'v':
-            version(PROGRAM_NAME);
-            return EXIT_SUCCESS;
-            break;
+            case 'v':
+                version(PROGRAM_NAME);
+                return EXIT_SUCCESS;
+                break;
 
-        case '?':
-            puts("\
+            case '?':
+                puts("\
 Usage: hprologix [OPTIONS]... [COMMAND]\n\
 Configure the prologix adapter\n");
-            return EXIT_FAILURE;
+                return EXIT_FAILURE;
 
-        default:
-            abort();
+            default:
+                abort();
         }
     }
 
@@ -283,64 +282,64 @@ Configure the prologix adapter\n");
         int srq;
 
         switch (p_sign) {
-        case SIG_IFC:
-            if (ad_ifc(&ad) == ad_get_curr_errcode(&ad)) {
-                AD_SAVE_ERROR_INFO(ad);
-                paderror(ad.aderror, "While sending IFC signal", ad.aderror_info);
-                ad_close(&ad);
-                return EXIT_FAILURE;
-            }
-            break;
+            case SIG_IFC:
+                if (ad_ifc(&ad) == ad_get_curr_errcode(&ad)) {
+                    AD_SAVE_ERROR_INFO(ad);
+                    paderror(ad.aderror, "While sending IFC signal", ad.aderror_info);
+                    ad_close(&ad);
+                    return EXIT_FAILURE;
+                }
+                break;
 
-        case SIG_CLR:
-            if (ad_clr(&ad) == ad_get_curr_errcode(&ad)) {
-                AD_SAVE_ERROR_INFO(ad);
-                paderror(ad.aderror, "While sending CLR signal", ad.aderror_info);
-                ad_close(&ad);
-                return EXIT_FAILURE;
-            }
-            break;
+            case SIG_CLR:
+                if (ad_clr(&ad) == ad_get_curr_errcode(&ad)) {
+                    AD_SAVE_ERROR_INFO(ad);
+                    paderror(ad.aderror, "While sending CLR signal", ad.aderror_info);
+                    ad_close(&ad);
+                    return EXIT_FAILURE;
+                }
+                break;
 
-        case SIG_LOC:
-            if (ad_loc(&ad) == ad_get_curr_errcode(&ad)) {
-                AD_SAVE_ERROR_INFO(ad);
-                paderror(ad.aderror, "While sending LOC signal", ad.aderror_info);
-                ad_close(&ad);
-                return EXIT_FAILURE;
-            }
-            break;
+            case SIG_LOC:
+                if (ad_loc(&ad) == ad_get_curr_errcode(&ad)) {
+                    AD_SAVE_ERROR_INFO(ad);
+                    paderror(ad.aderror, "While sending LOC signal", ad.aderror_info);
+                    ad_close(&ad);
+                    return EXIT_FAILURE;
+                }
+                break;
 
-        case SIG_SRQ:
-            srq = ad_srq(&ad);
-            if (srq != ad_get_curr_errcode(&ad))
-                printf("Signal returned: %d\n", ad_srq(&ad));
-            else {
-                AD_SAVE_ERROR_INFO(ad);
-                paderror(ad.aderror, "While sending SRQ signal", ad.aderror_info);
-                ad_close(&ad);
-                return EXIT_FAILURE;
-            }
+            case SIG_SRQ:
+                srq = ad_srq(&ad);
+                if (srq != ad_get_curr_errcode(&ad))
+                    printf("Signal returned: %d\n", ad_srq(&ad));
+                else {
+                    AD_SAVE_ERROR_INFO(ad);
+                    paderror(ad.aderror, "While sending SRQ signal", ad.aderror_info);
+                    ad_close(&ad);
+                    return EXIT_FAILURE;
+                }
 
-            break;
+                break;
 
-        case SIG_SPL:
-            // TODO: check this
-            val = ad_spoll(&ad);
-            printf("Signal returned: ");
-            if (val != ad_get_curr_errcode(&ad))
-                printf("%d\n", val);
-            else
-                printf("no answer\n");
-            break;
+            case SIG_SPL:
+                // TODO: check this
+                val = ad_spoll(&ad);
+                printf("Signal returned: ");
+                if (val != ad_get_curr_errcode(&ad))
+                    printf("%d\n", val);
+                else
+                    printf("no answer\n");
+                break;
 
-        case SIG_RST:
-            if (ad_rst(&ad) == ad_get_curr_errcode(&ad)) {
-                AD_SAVE_ERROR_INFO(ad);
-                paderror(ad.aderror, "While sending RST signal", ad.aderror_info);
-                ad_close(&ad);
-                return EXIT_FAILURE;
-            }
-            break;
+            case SIG_RST:
+                if (ad_rst(&ad) == ad_get_curr_errcode(&ad)) {
+                    AD_SAVE_ERROR_INFO(ad);
+                    paderror(ad.aderror, "While sending RST signal", ad.aderror_info);
+                    ad_close(&ad);
+                    return EXIT_FAILURE;
+                }
+                break;
         }
         return EXIT_SUCCESS;
     }

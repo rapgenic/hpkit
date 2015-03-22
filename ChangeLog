@@ -1,6 +1,16 @@
+2015-03-22  Giulio Girardi  <giulio@rapgenic.com>
+
+    release 0.2.5d; complete adapters.c rewrite, introduced xml adapter 
+    configuration file, rewrote communication section for hprologix, hpkit, 
+    hplot, hplisten, possibility to create a test executable, cleaned the code, 
+    introduced error handling, partially wrote prologix adapter configuration 
+    file, removed unused files, moved hpib section to ad_serial
+
+    NOTE: now it needs libxml 2.0 >= 2.4
+
 2105-01-28  Giulio Girardi  <giulio@rapgenic.com>
 
-	release 0.2.1; minor improvements
+    release 0.2.1; minor improvements
 
 2015-01-21  Giulio Girardi  <giulio@rapgenic.com>
 
@@ -12,5 +22,5 @@
 
 2015-01-11  Giulio Girardi  <giulio@rapgenic.com>
 
-	First commit; release 0.1
+    First commit; release 0.1
 

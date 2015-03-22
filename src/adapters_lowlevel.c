@@ -38,8 +38,7 @@
  * @param baudrate
  * @return 
  */
-int ad_serial_config(ad_serial_t *ser, char *tty, int timeout, int baudrate)
-{
+int ad_serial_config(ad_serial_t *ser, char *tty, int timeout, int baudrate) {
     struct termios tio_serial;
 
     ser->f_serial = open(tty, O_RDWR | O_NOCTTY);
@@ -74,8 +73,7 @@ int ad_serial_config(ad_serial_t *ser, char *tty, int timeout, int baudrate)
  * @param until
  * @return 
  */
-int ad_serial_read_until(ad_serial_t *ser, char *buf, int len, char until)
-{
+int ad_serial_read_until(ad_serial_t *ser, char *buf, int len, char until) {
     char c;
     int count = 0;
 
@@ -107,8 +105,7 @@ int ad_serial_read_until(ad_serial_t *ser, char *buf, int len, char until)
  * @param c
  * @return 
  */
-int ad_serial_read_char(ad_serial_t *ser, char *c)
-{
+int ad_serial_read_char(ad_serial_t *ser, char *c) {
     int rr;
 
     rr = read(ser->f_serial, c, 1);
@@ -132,8 +129,7 @@ int ad_serial_read_char(ad_serial_t *ser, char *c)
  * @param string
  * @return 
  */
-int ad_serial_write(ad_serial_t *ser, char *string)
-{
+int ad_serial_write(ad_serial_t *ser, char *string) {
     if (write(ser->f_serial, string, strlen(string)) == -1) {
         ser->aderror = AD_ERR_IO;
         return 0;
@@ -147,8 +143,7 @@ int ad_serial_write(ad_serial_t *ser, char *string)
  * @param ser
  * @return 
  */
-int ad_serial_close(ad_serial_t *ser)
-{
+int ad_serial_close(ad_serial_t *ser) {
     close(ser->f_serial);
 }
 

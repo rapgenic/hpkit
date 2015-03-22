@@ -40,8 +40,7 @@
  * @param timeout
  * @return 
  */
-int ad_config(adapter_t *ad, char *filename, char *tty, int timeout)
-{
+int ad_config(adapter_t *ad, char *filename, char *tty, int timeout) {
     // resetting adapter struct
     // needed for ad_close
     *ad = (const adapter_t){0};
@@ -137,8 +136,7 @@ int ad_config(adapter_t *ad, char *filename, char *tty, int timeout)
  * @param name
  * @return 
  */
-static xmlAttr* _ad_find_node_attr_by_name(xmlAttr *attr, char *name)
-{
+static xmlAttr* _ad_find_node_attr_by_name(xmlAttr *attr, char *name) {
     int x;
 
     // TODO: check this!!! possible segfault
@@ -160,8 +158,7 @@ static xmlAttr* _ad_find_node_attr_by_name(xmlAttr *attr, char *name)
  * @param _command
  * @return 
  */
-static int _ad_command_compile(adapter_t *ad, char *command_name, size_t count, int values[], char *_command)
-{
+static int _ad_command_compile(adapter_t *ad, char *command_name, size_t count, int values[], char *_command) {
     int x, y;
     char temp[BUF_MAXLEN];
     char command[STR_MAXLEN] = "";
@@ -200,158 +197,158 @@ static int _ad_command_compile(adapter_t *ad, char *command_name, size_t count, 
         int min = 0, max = 0;
 
         switch (ad->ad_conf.syntax[x]) {
-        case 'p':
-            strcat(command, ad->ad_conf.prefix);
-            break;
-        case 'c':
-            sprintf(temp, "%s/@cmd", command_name);
+            case 'p':
+                strcat(command, ad->ad_conf.prefix);
+                break;
+            case 'c':
+                sprintf(temp, "%s/@cmd", command_name);
 
-            current_regex_result = xmlXPathEvalExpression(temp, ad->xpath_context);
+                current_regex_result = xmlXPathEvalExpression(temp, ad->xpath_context);
 
-            if (current_regex_result == NULL) {
-                ad->aderror = AD_ERR_REGEX;
-                _AD_SAVE_ERROR_INFO;
-                return 0;
-            }
-
-            if (current_regex_result->nodesetval->nodeNr != 1) {
-                ad->aderror = AD_ERR_SYNTAX;
-                _AD_SAVE_ERROR_INFO;
-                return 0;
-            }
-
-            strcat(command, current_regex_result->nodesetval->nodeTab[0]->children->content);
-
-            xmlXPathFreeObject(current_regex_result);
-            break;
-        case 's':
-            strcat(command, " ");
-            break;
-        case 'a':
-            if (ad->ad_conf.syntax[x + 1] != '(') {
-                ad->aderror = AD_ERR_SYNTAX;
-                _AD_SAVE_ERROR_INFO;
-                return 0;
-            } else {
-                if (ad->ad_conf.syntax[x + 2] == ')') {
-                    ad->aderror = AD_ERR_SYNTAX;
+                if (current_regex_result == NULL) {
+                    ad->aderror = AD_ERR_REGEX;
                     _AD_SAVE_ERROR_INFO;
                     return 0;
-                } else {
-                    switch (ad->ad_conf.syntax[x + 2]) {
-                    case 's':
-                        separator = ' ';
-                        break;
-                    default:
-                        separator = ad->ad_conf.syntax[x + 2];
-                        break;
-                    }
-                }
-            }
-
-            if (ad->ad_conf.syntax[x + 3] != ')') {
-                ad->aderror = AD_ERR_SYNTAX;
-                _AD_SAVE_ERROR_INFO;
-                return 0;
-            }
-
-            x += 3;
-
-            strcpy(temp, command_name);
-            strcat(temp, "/params/param");
-
-            current_regex_result = xmlXPathEvalExpression(temp, ad->xpath_context);
-
-            if (current_regex_result == NULL) {
-                ad->aderror = AD_ERR_REGEX;
-                _AD_SAVE_ERROR_INFO;
-                return 0;
-            }
-
-            size = (current_regex_result->nodesetval) ? current_regex_result->nodesetval->nodeNr : 0;
-
-            // Maybe not really necessary...
-            //if (size != count) {
-            //    fprintf(stderr, "Warning - %s: different number of arguments\n", command_name);
-            //}
-
-            // Adds the arguments to the command
-            for (y = 0; y < size; y++) {
-                if (y >= count)
-                    break;
-
-                // Determines param type
-                if (strcmp(_ad_find_node_attr_by_name(current_regex_result->nodesetval->nodeTab[y]->properties, "type")->children->content, "limit") == 0) {
-                    char temp_xpath_expr[STR_MAXLEN];
-                    xmlChar *str;
-
-                    xmlXPathObject *from;
-                    xmlXPathObject *to;
-
-                    sprintf(temp_xpath_expr, "%s/params/param[%d]/from", command_name, (y + 1));
-
-                    from = xmlXPathEvalExpression(temp_xpath_expr, ad->xpath_context);
-
-                    if (from == NULL) {
-                        ad->aderror = AD_ERR_REGEX;
-                        _AD_SAVE_ERROR_INFO;
-                        return 0;
-                    }
-
-                    if (from->nodesetval->nodeNr != 1) {
-                        ad->aderror = AD_ERR_SYNTAX;
-                        _AD_SAVE_ERROR_INFO;
-                        return 0;
-                    }
-
-                    sprintf(temp_xpath_expr, "%s/params/param[%d]/upto", command_name, (y + 1));
-                    to = xmlXPathEvalExpression(temp_xpath_expr, ad->xpath_context);
-
-                    if (to == NULL) {
-                        ad->aderror = AD_ERR_REGEX;
-                        _AD_SAVE_ERROR_INFO;
-                        return 0;
-                    }
-
-                    if (to->nodesetval->nodeNr != 1) {
-                        ad->aderror = AD_ERR_SYNTAX;
-                        _AD_SAVE_ERROR_INFO;
-                        return 0;
-                    }
-
-                    min = atoi(from->nodesetval->nodeTab[0]->children->content);
-                    max = atoi(to->nodesetval->nodeTab[0]->children->content);
-
-                    xmlXPathFreeObject(from);
-                    xmlXPathFreeObject(to);
-                } else if (strcmp(_ad_find_node_attr_by_name(current_regex_result->nodesetval->nodeTab[y]->properties, "type")->children->content, "bit") == 0) {
-                    min = 0;
-                    max = 1;
                 }
 
-                // Checks value
-                if (min == max) {
+                if (current_regex_result->nodesetval->nodeNr != 1) {
                     ad->aderror = AD_ERR_SYNTAX;
                     _AD_SAVE_ERROR_INFO;
                     return 0;
                 }
 
-                if (values[y] < min || values[y] > max) {
-                    ad->aderror = AD_ERR_RANGE;
+                strcat(command, current_regex_result->nodesetval->nodeTab[0]->children->content);
+
+                xmlXPathFreeObject(current_regex_result);
+                break;
+            case 's':
+                strcat(command, " ");
+                break;
+            case 'a':
+                if (ad->ad_conf.syntax[x + 1] != '(') {
+                    ad->aderror = AD_ERR_SYNTAX;
                     _AD_SAVE_ERROR_INFO;
                     return 0;
                 } else {
-                    char add[STR_MAXLEN];
-
-                    strncat(command, &separator, 1);
-                    sprintf(add, "%d", values[y]);
-                    strcat(command, add);
+                    if (ad->ad_conf.syntax[x + 2] == ')') {
+                        ad->aderror = AD_ERR_SYNTAX;
+                        _AD_SAVE_ERROR_INFO;
+                        return 0;
+                    } else {
+                        switch (ad->ad_conf.syntax[x + 2]) {
+                            case 's':
+                                separator = ' ';
+                                break;
+                            default:
+                                separator = ad->ad_conf.syntax[x + 2];
+                                break;
+                        }
+                    }
                 }
-            }
 
-            xmlXPathFreeObject(current_regex_result);
+                if (ad->ad_conf.syntax[x + 3] != ')') {
+                    ad->aderror = AD_ERR_SYNTAX;
+                    _AD_SAVE_ERROR_INFO;
+                    return 0;
+                }
 
-            break;
+                x += 3;
+
+                strcpy(temp, command_name);
+                strcat(temp, "/params/param");
+
+                current_regex_result = xmlXPathEvalExpression(temp, ad->xpath_context);
+
+                if (current_regex_result == NULL) {
+                    ad->aderror = AD_ERR_REGEX;
+                    _AD_SAVE_ERROR_INFO;
+                    return 0;
+                }
+
+                size = (current_regex_result->nodesetval) ? current_regex_result->nodesetval->nodeNr : 0;
+
+                // Maybe not really necessary...
+                //if (size != count) {
+                //    fprintf(stderr, "Warning - %s: different number of arguments\n", command_name);
+                //}
+
+                // Adds the arguments to the command
+                for (y = 0; y < size; y++) {
+                    if (y >= count)
+                        break;
+
+                    // Determines param type
+                    if (strcmp(_ad_find_node_attr_by_name(current_regex_result->nodesetval->nodeTab[y]->properties, "type")->children->content, "limit") == 0) {
+                        char temp_xpath_expr[STR_MAXLEN];
+                        xmlChar *str;
+
+                        xmlXPathObject *from;
+                        xmlXPathObject *to;
+
+                        sprintf(temp_xpath_expr, "%s/params/param[%d]/from", command_name, (y + 1));
+
+                        from = xmlXPathEvalExpression(temp_xpath_expr, ad->xpath_context);
+
+                        if (from == NULL) {
+                            ad->aderror = AD_ERR_REGEX;
+                            _AD_SAVE_ERROR_INFO;
+                            return 0;
+                        }
+
+                        if (from->nodesetval->nodeNr != 1) {
+                            ad->aderror = AD_ERR_SYNTAX;
+                            _AD_SAVE_ERROR_INFO;
+                            return 0;
+                        }
+
+                        sprintf(temp_xpath_expr, "%s/params/param[%d]/upto", command_name, (y + 1));
+                        to = xmlXPathEvalExpression(temp_xpath_expr, ad->xpath_context);
+
+                        if (to == NULL) {
+                            ad->aderror = AD_ERR_REGEX;
+                            _AD_SAVE_ERROR_INFO;
+                            return 0;
+                        }
+
+                        if (to->nodesetval->nodeNr != 1) {
+                            ad->aderror = AD_ERR_SYNTAX;
+                            _AD_SAVE_ERROR_INFO;
+                            return 0;
+                        }
+
+                        min = atoi(from->nodesetval->nodeTab[0]->children->content);
+                        max = atoi(to->nodesetval->nodeTab[0]->children->content);
+
+                        xmlXPathFreeObject(from);
+                        xmlXPathFreeObject(to);
+                    } else if (strcmp(_ad_find_node_attr_by_name(current_regex_result->nodesetval->nodeTab[y]->properties, "type")->children->content, "bit") == 0) {
+                        min = 0;
+                        max = 1;
+                    }
+
+                    // Checks value
+                    if (min == max) {
+                        ad->aderror = AD_ERR_SYNTAX;
+                        _AD_SAVE_ERROR_INFO;
+                        return 0;
+                    }
+
+                    if (values[y] < min || values[y] > max) {
+                        ad->aderror = AD_ERR_RANGE;
+                        _AD_SAVE_ERROR_INFO;
+                        return 0;
+                    } else {
+                        char add[STR_MAXLEN];
+
+                        strncat(command, &separator, 1);
+                        sprintf(add, "%d", values[y]);
+                        strcat(command, add);
+                    }
+                }
+
+                xmlXPathFreeObject(current_regex_result);
+
+                break;
         }
     }
 
@@ -369,8 +366,7 @@ static int _ad_command_compile(adapter_t *ad, char *command_name, size_t count, 
  * @param _answer
  * @return 
  */
-static int _ad_command_read_answer(adapter_t *ad, char *command_name, char *_answer)
-{
+static int _ad_command_read_answer(adapter_t *ad, char *command_name, char *_answer) {
     char temp[BUF_MAXLEN];
     char returnbuf[BUF_MAXLEN];
     int i = 0;
@@ -422,11 +418,11 @@ static int _ad_command_read_answer(adapter_t *ad, char *command_name, char *_ans
                     }
 
                     switch (str[0]) {
-                    case 's':
-                        ad->__ad_temp_vars.__answer_separator = ' ';
-                        break;
-                    default:
-                        ad->__ad_temp_vars.__answer_separator = str[0];
+                        case 's':
+                            ad->__ad_temp_vars.__answer_separator = ' ';
+                            break;
+                        default:
+                            ad->__ad_temp_vars.__answer_separator = str[0];
                     }
                 }
             }
@@ -473,8 +469,7 @@ static int _ad_command_read_answer(adapter_t *ad, char *command_name, char *_ans
  * @param values
  * @return 
  */
-int __ad_command(adapter_t *ad, char *command_name, size_t count, int values[])
-{
+int __ad_command(adapter_t *ad, char *command_name, size_t count, int values[]) {
     char command[STR_MAXLEN];
     char temp[BUF_MAXLEN];
     char answer[BUF_MAXLEN];
@@ -584,8 +579,7 @@ int __ad_command(adapter_t *ad, char *command_name, size_t count, int values[])
  * @param ad
  * @return 
  */
-int ad_get_next_answer(adapter_t *ad)
-{
+int ad_get_next_answer(adapter_t *ad) {
     char *answer_str;
     char *endptr;
     int converted_answer;
@@ -625,8 +619,7 @@ int ad_get_next_answer(adapter_t *ad)
  * @param ad
  * @return 
  */
-inline int ad_get_curr_errcode(adapter_t *ad)
-{
+inline int ad_get_curr_errcode(adapter_t *ad) {
     return ad->__ad_temp_vars.__curr_err_ret_val;
 }
 
@@ -636,8 +629,7 @@ inline int ad_get_curr_errcode(adapter_t *ad)
  * @param const_name
  * @return 
  */
-int ad_get_const(adapter_t *ad, char *const_name)
-{
+int ad_get_const(adapter_t *ad, char *const_name) {
     xmlXPathObject *current_regex_result;
     char temp[STR_MAXLEN];
 
@@ -667,8 +659,7 @@ int ad_get_const(adapter_t *ad, char *const_name)
  * @param ad
  * @return 
  */
-int ad_close(adapter_t *ad)
-{
+int ad_close(adapter_t *ad) {
     if (ad->ad_serial.f_serial) {
         ad_serial_close(&ad->ad_serial);
     }

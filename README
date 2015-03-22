@@ -21,7 +21,8 @@ You can set the device using the -d|--device option.
 
 You can set the adapter you're using with -a|--adapter option. Currently
 hplot supports only the prologix GPIB-USB adapter (currently GPIB-USB
-controller 6.0) see http://www.prologix.biz
+controller 6.0, see http://www.prologix.biz) but you may create your own
+adapter config file to use another adapter.
 
 You can set the address to communicate with the instrument by using -r|--address
 option.
@@ -72,7 +73,7 @@ normally the configuration is done by the single programs) and to send special
 signals, for example RST (reset) or CLR (clear).
 
 when you configure the adapter with hprologix, you may want to use the option 
-"-a|--adapter none" which tells the program NOT to configure the adapter 
+-c|--no-config which tells the program NOT to configure the adapter 
 properly, to keep using your settings.
 
 To get current configuration, simply call hprologix with option -g|--get-config.
@@ -92,7 +93,7 @@ With hprologix you can also send to the adapter the following signals:
  - SPOLL
 
 You can send them with option -n|--signal followed by the signal name (NOTE that
-you can send only one signal once)
+you can send only one signal per time)
 
 For more information about the previous signals see the Prologix Adapter User
 Manual, which you can find at http://www.prologix.biz 
@@ -101,6 +102,14 @@ Manual, which you can find at http://www.prologix.biz
 | INSTALL                            |
 --------------------------------------
 
+1. Prerequisites
+--------------------------------------
+To be able to compile the HPKit suite you have to install libxml:
+
+sudo apt-get install libxml
+
+2. Building and Installing
+--------------------------------------
 To build and install, run on a shell:
 
 ./configure

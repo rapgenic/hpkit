@@ -21,8 +21,7 @@
 
 #include "adapters.h"
 
-int main()
-{
+int main() {
     adapter_t ad;
 
     if (!ad_config(&ad, "../src/adapters/prologix.conf.xml", "/dev/ttyUSB0", 20)) {
@@ -40,18 +39,18 @@ int main()
 
     if (ad_set_auto(&ad, 1) == ad_get_curr_errcode(&ad))
         paderror(ad.aderror, NULL, ad.aderror_info);
-    */
-    
+     */
+
     ad_set_address(&ad, 20);
     printf("Address: %d\n", ad_get_address(&ad));
     printf("Eventual second address: %d\n", ad_get_next_answer(&ad));
-    
+
     if (ad_get_mode(&ad) == ad_get_const(&ad, "MD_DEVICE"))
         ad_set_mode(&ad, ad_get_const(&ad, "MD_CONTROLLER"));
     else
         ad_set_mode(&ad, ad_get_const(&ad, "MD_DEVICE"));
-    
+
     printf("Mode: %s\n", ad_get_mode(&ad) ? "Controller" : "Device");
-    
+
     ad_close(&ad);
 }

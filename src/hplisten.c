@@ -29,8 +29,7 @@
 #define PROGRAM_NAME "hplisten"
 
 int
-main(int argc, char **argv)
-{
+main(int argc, char **argv) {
     // temp vars
     char buf;
     int c, d;
@@ -74,67 +73,67 @@ main(int argc, char **argv)
             break;
 
         switch (c) {
-        case 'd':
-            strcpy(tty, optarg);
-            break;
+            case 'd':
+                strcpy(tty, optarg);
+                break;
 
-        case 'a':
-            if (optarg != "")
-                strcpy(config_file, optarg);
-            break;
+            case 'a':
+                if (optarg != "")
+                    strcpy(config_file, optarg);
+                break;
 
-        case 'r':
-            pad_temp = strtok(optarg, ",");
-            sad_temp = strtok(NULL, ",");
+            case 'r':
+                pad_temp = strtok(optarg, ",");
+                sad_temp = strtok(NULL, ",");
 
-            ad_address = strtol(pad_temp, &endptr, 10);
-            if (*endptr != '\0') {
-                AD_SAVE_ERROR_INFO(ad);
-                fprintf(stderr, "%s\n\tWhile processing -r|--address: Non valid option\n", ad.aderror_info);
-                return EXIT_FAILURE;
-            }
-
-            if (sad_temp != NULL) {
-                ad_saddress = strtol(sad_temp, &endptr_s, 10);
-                if (*endptr_s != '\0') {
+                ad_address = strtol(pad_temp, &endptr, 10);
+                if (*endptr != '\0') {
                     AD_SAVE_ERROR_INFO(ad);
                     fprintf(stderr, "%s\n\tWhile processing -r|--address: Non valid option\n", ad.aderror_info);
                     return EXIT_FAILURE;
                 }
-            }
-            break;
 
-        case 'o':
-            strcpy(output_path, optarg);
-            using_output_file = 1;
-            break;
+                if (sad_temp != NULL) {
+                    ad_saddress = strtol(sad_temp, &endptr_s, 10);
+                    if (*endptr_s != '\0') {
+                        AD_SAVE_ERROR_INFO(ad);
+                        fprintf(stderr, "%s\n\tWhile processing -r|--address: Non valid option\n", ad.aderror_info);
+                        return EXIT_FAILURE;
+                    }
+                }
+                break;
 
-        case 't':
-            d = strtol(optarg, &endptr, 10);
-            if (*endptr != '\0') {
-                AD_SAVE_ERROR_INFO(ad);
-                fprintf(stderr, "%s\n\tWhile processing -t|--timeout: Non valid option\n", ad.aderror_info);
-                return EXIT_FAILURE;
-            }
+            case 'o':
+                strcpy(output_path, optarg);
+                using_output_file = 1;
+                break;
 
-            if (d < 100) {
-                AD_SAVE_ERROR_INFO(ad);
-                fprintf(stderr, "%s\n\tWhile processing -t|--timeout: Non valid option\n", ad.aderror_info);
-                return EXIT_FAILURE;
-            }
+            case 't':
+                d = strtol(optarg, &endptr, 10);
+                if (*endptr != '\0') {
+                    AD_SAVE_ERROR_INFO(ad);
+                    fprintf(stderr, "%s\n\tWhile processing -t|--timeout: Non valid option\n", ad.aderror_info);
+                    return EXIT_FAILURE;
+                }
 
-            timeout = d / 100;
-            break;
+                if (d < 100) {
+                    AD_SAVE_ERROR_INFO(ad);
+                    fprintf(stderr, "%s\n\tWhile processing -t|--timeout: Non valid option\n", ad.aderror_info);
+                    return EXIT_FAILURE;
+                }
 
-        case 'c':
-            config_adapter = 0;
-            break;
+                timeout = d / 100;
+                break;
 
-        case 'h':
-            puts("\
+            case 'c':
+                config_adapter = 0;
+                break;
+
+            case 'h':
+                puts("\
 Usage: hplisten [OPTIONS]...\n\
 Dump or save data sent by HP instrument's GPIB interface\n");
-            puts("\
+                puts("\
   -d, --device=STRING       communicate with serial interface defined by STRING;\n\
                             default: '/dev/ttyUSB0'\n\
   -a, --adapter=ADAPTER     set the adapter used to communicate with the\n\
@@ -149,29 +148,24 @@ Dump or save data sent by HP instrument's GPIB interface\n");
                             the -r|--address option)\n\
   -h, --help                show this help and exit\n\
   -v, --version             show information about program version and exit\n");
-            puts("\
-ADAPTER stands for the adapter you are using. Supported adapters are:\n\
-  prologix                  the Prologix adapter, fully supported\n\
-\nMore adapters may be added in the future\n");
-            printf("You can put your custom adapters there:\n\
-%s\n\n", DATA_PATH);
-            help();
-            return (EXIT_SUCCESS);
-            break;
+                adapters_list();
+                help();
+                return (EXIT_SUCCESS);
+                break;
 
-        case 'v':
-            version(PROGRAM_NAME);
-            return (EXIT_SUCCESS);
-            break;
+            case 'v':
+                version(PROGRAM_NAME);
+                return (EXIT_SUCCESS);
+                break;
 
-        case '?':
-            puts("\
+            case '?':
+                puts("\
 Usage: hplisten [OPTIONS]...\n\
 Dump or save data sent by HP instrument's GPIB interface\n");
-            return (EXIT_FAILURE);
+                return (EXIT_FAILURE);
 
-        default:
-            abort();
+            default:
+                abort();
         }
     }
 
