@@ -59,14 +59,14 @@ int paderror(ad_error_t aderror, char *str, ad_error_info_t aderror_info) {
     }
 
     if (aderror_info != NULL) {
-        fprintf(stderr, "%s\n\t", aderror_info);
+        fprintf(stderr, KRED "%s\n\t", aderror_info);
         aderror_info[0] = 0;
     }
 
     if (str == NULL)
-        fprintf(stderr, "%s\n", msg);
+        fprintf(stderr, "%s\n" KRST, msg);
     else
-        fprintf(stderr, "%s: %s\n", str, msg);
+        fprintf(stderr, "%s: %s\n" KRST, str, msg);
 
     aderror = AD_SUCCESS;
 
