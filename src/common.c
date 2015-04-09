@@ -73,7 +73,8 @@ int adapters_list() {
         }
         closedir(d);
     } else {
-        perror("While opening DATA_PATH");
+        char *str = strerror(errno);
+        fprintf (stderr, KRED "In %s: function %s (near line %d)\n\tWhile opening DATA_PATH: %s\n" KRST, __FILE__, __func__, __LINE__, str);
         return 0;
     }
 
