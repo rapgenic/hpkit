@@ -168,6 +168,7 @@ Dump or save plot data sent by HP instrument's GPIB interface\n");
   -h, --help                show this help and exit\n\
   -v, --version             show information about program version and exit\n");
                 adapters_list();
+                version(PROGRAM_NAME);
                 help();
                 return (EXIT_SUCCESS);
                 break;

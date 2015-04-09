@@ -164,6 +164,7 @@ Send a command to an instrument using GPIB interface and read the answer\n");
   -h, --help                show this help and exit\n\
   -v, --version             show information about program version and exit\n");
                 adapters_list();
+                version(PROGRAM_NAME);
                 help();
                 return (EXIT_SUCCESS);
                 break;

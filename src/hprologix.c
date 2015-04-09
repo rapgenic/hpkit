@@ -234,6 +234,7 @@ SIG stands for one of the following signals:\n\
   SPOLL                     perform a serial poll of the instrument at the\n\
                             specified address\n\
   RST                       perform a controller reset (it takes about 5 secs)\n");
+                version(PROGRAM_NAME);
                 help();
                 return EXIT_SUCCESS;
                 break;

@@ -79,7 +79,7 @@ int adapters_list() {
 
     puts("\nMore adapters may be added in the future\n");
     printf("Adapters config files are in:\n\
-%s\n\n", DATA_PATH);
+  %s\n\n", DATA_PATH);
 
     return 1;
 }
