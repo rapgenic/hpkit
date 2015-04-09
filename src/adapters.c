@@ -137,15 +137,16 @@ int ad_config(adapter_t *ad, char *filename, char *tty, int timeout) {
  * @return 
  */
 static xmlAttr* _ad_find_node_attr_by_name(xmlAttr *attr, char *name) {
-    int x;
+    int x = 0;
 
-    // TODO: check this!!! possible segfault
-    do {
-        if (strcmp(attr[x].name, name) == 0)
-            return &attr[x];
-        x++;
-    } while (attr[x - 1].next);
-
+    if (attr != NULL) {
+        do { 
+            if (strcmp(attr[x].name, name) == 0)
+                return &attr[x];
+            x++;
+        } while (attr[x-1].next != NULL);
+    }    
+    
     return NULL;
 }
 
@@ -274,11 +275,20 @@ static int _ad_command_compile(adapter_t *ad, char *command_name, size_t count, 
 
                 // Adds the arguments to the command
                 for (y = 0; y < size; y++) {
+                    xmlAttr* type_attr;
+                    
                     if (y >= count)
                         break;
 
                     // Determines param type
-                    if (strcmp(_ad_find_node_attr_by_name(current_regex_result->nodesetval->nodeTab[y]->properties, "type")->children->content, "limit") == 0) {
+                    
+                    type_attr = _ad_find_node_attr_by_name(current_regex_result->nodesetval->nodeTab[y]->properties, "type");
+                    
+                    if (type_attr == NULL) {
+                        ad->aderror = AD_ERR_SYNTAX;
+                        _AD_SAVE_ERROR_INFO;
+                        return 0;                        
+                    } else if (strcmp(type_attr->children->content, "limit") == 0) {
                         char temp_xpath_expr[STR_MAXLEN];
                         xmlChar *str;
 
@@ -321,9 +331,13 @@ static int _ad_command_compile(adapter_t *ad, char *command_name, size_t count, 
 
                         xmlXPathFreeObject(from);
                         xmlXPathFreeObject(to);
-                    } else if (strcmp(_ad_find_node_attr_by_name(current_regex_result->nodesetval->nodeTab[y]->properties, "type")->children->content, "bit") == 0) {
+                    } else if (strcmp(type_attr->children->content, "bit") == 0) {
                         min = 0;
                         max = 1;
+                    } else {
+                        ad->aderror = AD_ERR_SYNTAX;
+                        _AD_SAVE_ERROR_INFO;
+                        return 0;                        
                     }
 
                     // Checks value
