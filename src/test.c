@@ -20,6 +20,7 @@
 #include "config.h"
 
 #include "adapters.h"
+#include "colors.h"
 
 int main() {
     adapter_t ad;

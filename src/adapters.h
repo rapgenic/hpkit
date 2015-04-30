@@ -30,6 +30,7 @@
 
 #include "aderror.h"
 #include "adapters_lowlevel.h"
+#include "colors.h"
 
 #ifndef ADAPTERS_H
 #define	ADAPTERS_H

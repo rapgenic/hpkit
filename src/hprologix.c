@@ -25,6 +25,7 @@
 
 #include "adapters.h"
 #include "common.h"
+#include "colors.h"
 
 #define PROGRAM_NAME "hprologix"
 

@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "colors.h"
 
 #ifndef ADERROR_H
 #define	ADERROR_H

@@ -23,6 +23,7 @@
 #include <dirent.h>
 
 #include "adapters.h"
+#include "colors.h"
 
 #ifndef COMMON_H
 #define	COMMON_H

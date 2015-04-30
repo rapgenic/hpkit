@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "aderror.h"
+#include "colors.h"
 
 int paderror(ad_error_t aderror, char *str, ad_error_info_t aderror_info) {
     char msg[STR_MAXLEN];

@@ -31,6 +31,7 @@
 #include "aderror.h"
 #include "adapters_lowlevel.h"
 #include "adapters.h"
+#include "colors.h"
 
 /**
  * 

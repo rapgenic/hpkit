@@ -24,6 +24,7 @@
 
 #include "adapters.h"
 #include "common.h"
+#include "colors.h"
 
 int version(char *progname) {
     printf("%s (%s) %s\n", progname, PACKAGE_NAME, VERSION);

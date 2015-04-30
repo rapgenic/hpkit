@@ -28,6 +28,7 @@
 #include <termios.h>
 
 #include "aderror.h"
+#include "colors.h"
 
 #ifndef ADAPTERS_LOWLEVEL_H
 #define	ADAPTERS_LOWLEVEL_H
