@@ -1,8 +1,3 @@
-MAINTAINERCLEANFILES = \
-	$(GITIGNORE_MAINTAINERCLEANFILES_TOPLEVEL) \
-	$(GITIGNORE_MAINTAINERCLEANFILES_MAKEFILE_IN) \
-	$(GITIGNORE_MAINTAINERCLEANFILES_M4_LIBTOOL)
-
 bin_PROGRAMS = hplot hplisten hptalk hprologix
 
 hplot_SOURCES = \
@@ -41,5 +36,3 @@ hprologix_SOURCES = \
 	src/prologix_proto.c \
 	src/galvant_proto.c  \
 	src/hprologix.c
-
--include $(top_srcdir)/git.mk
